@@ -1,1 +1,1 @@
-using vite+react
+using vite+react, tailwind, daisy ui
