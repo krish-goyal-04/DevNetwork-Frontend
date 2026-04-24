@@ -1,4 +1,5 @@
 import NavBar from "./NavBar";
+import Login from "./Login";
 import { BrowserRouter, Routes, Route } from "react-router";
 import Body from "./Body";
 const App = () => {
@@ -6,7 +7,9 @@ const App = () => {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Body />} />
+          <Route path="/" element={<Body />}>
+            <Route path="/login" element={<Login />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </>
