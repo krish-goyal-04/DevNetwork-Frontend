@@ -5,7 +5,8 @@ import userReducer from "./userSlice";
 
 const appStore = configureStore({
   reducer: {
-    user: userReducer, //this userReducer is the userSlice.reducer function, which take state and action as parameters
+    user: userReducer,
+    //this userReducer is the userSlice.reducer function, which take state and action as parameters
   },
 });
 

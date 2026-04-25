@@ -1,21 +1,30 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { useNavigate } from "react-router";
+import { baseURL } from "../utils/constants";
 const Login = () => {
   const [emailId, setEmailId] = useState("Tinku@gmail.com");
   const [password, setPassword] = useState("Tinku@123");
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  //useDispatch hook is used to dispatch an action
   const handleLogin = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:3000/login",
+        baseURL + "/login",
         {
           emailId,
           password,
         },
         { withCredentials: true },
       );
-      console.log(res);
+      const user = res.data.data;
+      //console.log(user);
+      dispatch(addUser(user));
+      //console.log(res);
+      return navigate("/");
     } catch (err) {
       console.log(err);
     }

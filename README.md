@@ -742,3 +742,6 @@ Login → saved in localStorage → Refresh → restored ✅
 
 👉 Redux global state is stored in JavaScript memory (RAM) and is lost on refresh, tab close, or app reload, unless you persist it using tools like redux-persist.
 npm install @reduxjs/toolkit react-redux
+
+using redux devtools extension for checking all actions,states,differences,etc
+useSelector is used to subscribe to the redux store and useDispatch hook is used to dispatch an action for a slice

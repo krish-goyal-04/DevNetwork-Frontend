@@ -1,7 +1,7 @@
-import NavBar from "./NavBar";
-import Login from "./Login";
+import NavBar from "./components/NavBar";
+import Login from "./components/Login";
 import { BrowserRouter, Routes, Route } from "react-router";
-import Body from "./Body";
+import Body from "./components/Body";
 const App = () => {
   return (
     <>
