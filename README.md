@@ -399,3 +399,346 @@ withCredentials = frontend requesting cookies
 🧠 One-Line Summary
 
 For cookies in CORS: backend must allow credentials + specific origin, and frontend must send withCredentials: true.
+
+### Redux
+
+// Redux - Alternative of prop drilling (prop drilling was a headache)
+// Centralized store
+// Terms -
+// Action {event/object}(It's a [event] or [event+additional info], additional info like ex.- payload, object or data)
+// Store {hold states} (It contains state,the data you want to manupulate, it also contains reducers)
+// Reducer {functions}(This contains the entire logic for updating or changing a data)
+// Slice {features}(The logics of maintaining states for every features is in 'Slice', this contains initial state and reducer function)
+// State {data}
+
+// Whole path -
+// UI trigger -> Action dispatch -> store -> reducer -> state update in store -> UI update
+// ex- button click -> handlefunc() -> store -> increment() -> num+1 in store -> num+1 in UI
+
+// Steps -
+// 1. create store (in 'redux' folder)
+// 2. wrap the App.js with Provider
+// 3. create slice (in 'features' folder)
+// 4. create Reducers in slice
+// 5. register the created reducers in the store
+
+// useSelector, dispatch
+
+What is Redux?
+
+Redux is a state management library used to manage global state in applications.
+
+👉 Instead of passing data through many components (prop drilling), Redux stores everything in one central place (store).
+
+📌 Why Redux?
+Avoid prop drilling
+Share data across components
+Predictable state management
+Easier debugging
+2️⃣ Core Concepts of Redux
+
+Redux works using 3 main building blocks:
+
+🏪 1. Store
+
+👉 The single source of truth (global state)
+
+{
+counter: { value: 0 },
+user: { name: "Krish" }
+}
+⚡ 2. Action
+
+👉 A plain JavaScript object describing what happened
+
+{ type: "counter/increment" }
+
+With data:
+
+{ type: "counter/incrementByAmount", payload: 5 }
+🔧 3. Reducer
+
+👉 A function that decides how state changes
+
+(state, action) => newState
+🔁 Redux Flow (VERY IMPORTANT)
+UI → dispatch(action) → reducer → store updates → UI re-renders
+3️⃣ Problems with Traditional Redux
+Too much boilerplate
+Separate files for actions, types, reducers
+Complex setup
+🚀 4️⃣ What is Redux Toolkit (RTK)?
+
+Redux Toolkit is the official, modern way to write Redux
+
+👉 It simplifies:
+
+Store setup
+Reducers
+Actions
+Async logic
+5️⃣ Key Features of RTK
+configureStore() → creates store
+createSlice() → creates reducer + actions
+createAsyncThunk() → handles API calls
+Uses Immer internally
+🔥 6️⃣ createSlice() (MOST IMPORTANT)
+📌 Definition
+
+A slice = part of state + reducers + actions
+
+✅ Example: Counter Slice
+import { createSlice } from "@reduxjs/toolkit";
+
+const counterSlice = createSlice({
+name: "counter",
+
+initialState: {
+value: 0
+},
+
+reducers: {
+increment: (state) => {
+state.value += 1;
+},
+
+    decrement: (state) => {
+      state.value -= 1;
+    },
+
+    incrementByAmount: (state, action) => {
+      state.value += action.payload;
+    }
+
+}
+});
+🧠 What createSlice RETURNS
+{
+reducer: function,
+actions: {
+increment,
+decrement,
+incrementByAmount
+}
+}
+📦 Exporting
+export const { increment, decrement, incrementByAmount } = counterSlice.actions;
+
+export default counterSlice.reducer;
+⚡ 7️⃣ Store Setup
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counterSlice";
+
+export const store = configureStore({
+reducer: {
+counter: counterReducer
+}
+});
+🧠 State Shape
+state = {
+counter: { value: 0 }
+}
+🔗 8️⃣ Connecting Redux with React
+import { Provider } from "react-redux";
+import { store } from "./store";
+
+<Provider store={store}>
+  <App />
+</Provider>
+🎯 9️⃣ Using Redux in Components
+📥 Read State → useSelector
+import { useSelector } from "react-redux";
+
+const count = useSelector((state) => state.counter.value);
+📤 Update State → useDispatch
+import { useDispatch } from "react-redux";
+import { increment } from "./counterSlice";
+
+const dispatch = useDispatch();
+
+dispatch(increment());
+🔄 10️⃣ Full Execution Flow (STEP-BY-STEP)
+Step 1: Dispatch
+dispatch(increment());
+Step 2: Action Created
+{ type: "counter/increment" }
+Step 3: Reducer Executes
+(state) => {
+state.value += 1;
+}
+Step 4: State Updated
+{
+counter: { value: 1 }
+}
+Step 5: UI Re-renders
+🧠 11️⃣ Important Concept: State Mutation
+state.value += 1;
+
+👉 Looks like mutation ❌
+👉 Actually safe ✅ because of Immer
+
+🌐 12️⃣ Async Operations → createAsyncThunk
+📌 Example
+import { createAsyncThunk } from "@reduxjs/toolkit";
+
+export const fetchUser = createAsyncThunk(
+"user/fetchUser",
+async () => {
+const res = await fetch("/api/user");
+return res.json();
+}
+);
+📌 Handling States
+extraReducers: (builder) => {
+builder
+.addCase(fetchUser.pending, (state) => {
+state.loading = true;
+})
+.addCase(fetchUser.fulfilled, (state, action) => {
+state.loading = false;
+state.data = action.payload;
+})
+.addCase(fetchUser.rejected, (state) => {
+state.loading = false;
+state.error = "Failed";
+});
+}
+⚠️ 13️⃣ Common Mistakes
+
+❌ Not understanding flow
+✔️ Always remember:
+
+dispatch → reducer → store → UI
+
+❌ Trying to mutate state outside reducer
+✔️ Only inside slice reducers
+
+❌ Thinking Redux updates instantly
+✔️ UI updates after render cycle
+
+counterSlice.reduceer which is exported is imported as counnterReducer, both are same
+🧠 Where is Redux “global state” actually stored?
+
+👉 Short answer:
+
+Redux state is NOT stored in the browser (by default).
+
+It lives in:
+
+✅ JavaScript memory (RAM) inside your running app
+
+📦 Think of it like this:
+
+When your React app runs:
+
+Browser → loads JS → JS runs → Redux store created in memory
+
+👉 That “global state” is just a JavaScript object in memory, like:
+
+{
+counter: { value: 5 },
+user: { name: "Krish" }
+}
+⚡ Important: It is NOT stored in
+
+❌ Local Storage
+❌ Session Storage
+❌ Cookies
+❌ Database
+
+👉 Unless YOU explicitly store it there
+
+🔄 When does Redux state get LOST?
+
+Since it lives in memory, it disappears when memory is cleared.
+
+🧨 1. Page Refresh
+
+👉 MOST COMMON
+
+Ctrl + R / Reload
+
+💥 Entire JS memory resets → Redux state gone
+
+🧨 2. Closing Tab / Browser
+
+👉 Same effect
+
+💥 Memory cleared → state gone
+
+🧨 3. App Crash / Re-render from scratch
+
+If app reloads → state resets
+
+⏳ Does Redux state “expire”?
+
+👉 No built-in expiry system
+
+Because:
+
+It’s just memory
+No persistence
+
+👉 It exists ONLY while app is running
+
+🧠 Realization (VERY IMPORTANT)
+
+👉 Redux is temporary state management, not storage
+
+💾 Then how do apps keep users logged in?
+
+Good question 👇
+
+They use:
+
+1. Local Storage
+   localStorage.setItem("user", JSON.stringify(user));
+   Persistent
+   Survives refresh
+2. Cookies (for auth tokens)
+   Used for authentication
+   Sent to server automatically
+3. Session Storage
+   Cleared when tab closes
+   🚀 4. Persisting Redux (REAL WORLD)
+
+To keep Redux state after refresh, we use:
+
+👉 redux-persist
+
+Example Flow:
+Redux state → saved to localStorage → reload → rehydrated back into store
+Basic Example:
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+
+const persistConfig = {
+key: "root",
+storage,
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+🔥 Final Mental Model
+Concept Reality
+Redux store In-memory JS object
+Lifetime Until page refresh
+Persistence Only if you implement it
+Default behavior Temporary
+🧪 Real Example
+
+Login flow WITHOUT persistence:
+
+Login → Redux stores user → Refresh → user gone ❌
+
+WITH persistence:
+
+Login → saved in localStorage → Refresh → restored ✅
+⚠️ Common Beginner Mistake
+
+❌ “Redux will remember my data automatically”
+✔️ It will NOT — unless you persist it
+
+🏁 Final Answer (1 line)
+
+👉 Redux global state is stored in JavaScript memory (RAM) and is lost on refresh, tab close, or app reload, unless you persist it using tools like redux-persist.
+npm install @reduxjs/toolkit react-redux
