@@ -9,7 +9,7 @@ const UserCard = (data) => {
         <img
           src={photoUrl}
           alt={`${firstName} ${lastName || ""} profile`}
-          className="w-full h-60 object-cover "
+          className="w-full h-70 object-fit-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-t-2xl"></div>
       </figure>
@@ -47,10 +47,10 @@ const UserCard = (data) => {
         )}
         <div className="card-actions justify-center mt-6 gap-4">
           <button className="btn btn-primary btn-md shadow-md hover:shadow-lg">
-            Send Request
+            Interested
           </button>
           <button className="btn btn-outline btn-secondary btn-md shadow-md hover:shadow-lg">
-            Reject
+            Ignore
           </button>
         </div>
       </div>

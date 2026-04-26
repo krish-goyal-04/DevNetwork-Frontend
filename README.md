@@ -752,3 +752,51 @@ when we login, the user is stored in redux and the user id is stored in cookies 
 so using get /pprofile we can get back the user and using useDispatch(addUser()) we can again add user along with useEffect hook.
 
 we will create a feedd slice
+
+### The Issue (Be precise)
+
+“I had schema-level validations like minimum length for fields such as lastName, city, state, etc.
+
+During profile updates, my frontend was sending empty strings ("") for fields the user didn’t fill.
+
+Mongoose treated these as actual values, not missing fields, and triggered validation errors like:
+
+‘Path length shorter than minimum’
+‘Invalid age’”
+🧠 3. Root Cause (This is what interviewers care about)
+
+“The root cause was misunderstanding the difference between:
+
+Missing field (undefined) → valid
+Empty string ("") → invalid
+
+In JavaScript + JSON:
+
+undefined fields are ignored
+but "" is explicitly validated”
+✅ 4. Solution (Explain cleanly)
+
+“I solved it by cleaning the payload on the frontend before sending it to the backend.”
+
+const filteredData = Object.fromEntries(
+Object.entries(form).filter(([_, value]) => value !== "")
+);
+
+“Only valid, non-empty fields are sent to the backend, so schema validations work correctly.”
+
+### Issue
+
+Redux state loss on refresh
+
+“After refresh, Redux state resets and user becomes null.”
+and i was fetching user from redux store on referesh even when user was not present initially during refresh(since we do an api call to get user on refresh), so the error was coming, then i solved it using the below method.
+✅ Fix:
+
+Called /profile API on app load to restore user state
+⚠️ D. Destructuring crash
+
+“Component crashed when trying to destructure null user data.”
+
+✅ Fix:
+
+if (!profileData) return <Loading />;

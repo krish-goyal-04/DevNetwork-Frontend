@@ -1,9 +1,18 @@
 import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import EditProfileForm from "./EditProfileForm";
 
+//
 const Profile = () => {
+  const [openEdit, setOpenEdit] = useState(false);
   const profileData = useSelector((state) => state.user);
+  if (!profileData)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   const {
     firstName,
     lastName,
@@ -70,7 +79,7 @@ const Profile = () => {
                   skills.map((skill, i) => (
                     <span
                       key={i}
-                      className="badge badge-primary badge-outline px-3 py-2"
+                      className="badge badge-primary badge-outline px-3 py-2 capitalize"
                     >
                       {skill}
                     </span>
@@ -95,8 +104,19 @@ const Profile = () => {
 
         {/* 🔹 Action */}
         <div className="card-actions justify-center pb-6">
-          <button className="btn btn-primary px-6">Edit Profile</button>
+          <button
+            className="btn btn-primary px-6"
+            onClick={() => setOpenEdit(true)}
+          >
+            Edit Profile
+          </button>
         </div>
+        {openEdit && (
+          <EditProfileForm
+            onClose={() => setOpenEdit(false)}
+            user={profileData}
+          />
+        )}
       </div>
     </div>
   );
