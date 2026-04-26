@@ -750,3 +750,5 @@ useSelector is used to subscribe to the redux store and useDispatch hook is used
 
 when we login, the user is stored in redux and the user id is stored in cookies as jwt token, when we refresh the redux state/data is lost but token remains.
 so using get /pprofile we can get back the user and using useDispatch(addUser()) we can again add user along with useEffect hook.
+
+we will create a feedd slice
