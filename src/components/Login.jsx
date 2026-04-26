@@ -7,6 +7,7 @@ import { baseURL } from "../utils/constants";
 const Login = () => {
   const [emailId, setEmailId] = useState("Tinku@gmail.com");
   const [password, setPassword] = useState("Tinku@123");
+  const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   //useDispatch hook is used to dispatch an action
@@ -27,6 +28,7 @@ const Login = () => {
       return navigate("/");
     } catch (err) {
       console.log(err);
+      setError(err?.response?.data?.message || "Something went wrong");
     }
   };
   return (
@@ -45,10 +47,11 @@ const Login = () => {
             ></input>
             <input
               type="password"
-              className="bg-base-100 p-2 rounded-lg"
+              className="bg-base-100 p-2 my-3 rounded-lg"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             ></input>
+            {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
           </div>
 
           <div className="card-actions flex justify-center ">
