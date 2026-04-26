@@ -5,8 +5,8 @@ import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router";
 import { baseURL } from "../utils/constants";
 const Login = () => {
-  const [emailId, setEmailId] = useState("Tinku@gmail.com");
-  const [password, setPassword] = useState("Tinku@123");
+  const [emailId, setEmailId] = useState("Raju@gmail.com");
+  const [password, setPassword] = useState("Raju@123");
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Login = () => {
         { withCredentials: true },
       );
       const user = res.data.data;
-      //console.log(user);
+      console.log("user:", user);
       dispatch(addUser(user));
       //console.log(res);
       return navigate("/");

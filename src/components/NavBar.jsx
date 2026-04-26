@@ -9,18 +9,16 @@ const NavBar = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      const res = axios.post(
+      const res = await axios.post(
         baseURL + "/logout",
         {},
         { withCredentials: true },
       );
       dispatch(removeUser());
       return navigate("/login");
-    } catch (error) {
-      console.log;
-    }
+    } catch (error) {}
   };
   return (
     <div className="navbar bg-base-100 shadow-sm">
@@ -32,7 +30,8 @@ const NavBar = () => {
       {user && (
         <div className="flex gap-7 mr-4 items-center">
           <div className="flex gap-1">
-            Welcome, <p className="font-semibold">{user.firstName}</p>!
+            Welcome,{" "}
+            <p className="font-semibold capitalize">{user.firstName}</p>!
           </div>
           <div className="dropdown dropdown-end">
             <div

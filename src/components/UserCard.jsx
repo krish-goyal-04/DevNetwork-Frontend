@@ -15,7 +15,7 @@ const UserCard = (data) => {
       </figure>
       <div className="card-body p-6 bg-base-100">
         <div className="text-center mb-4">
-          <h2 className="card-title text-2xl font-extrabold text-base-content">
+          <h2 className="card-title text-2xl font-extrabold text-base-content capitalize">
             {firstName} {lastName}
           </h2>
           {age && (
