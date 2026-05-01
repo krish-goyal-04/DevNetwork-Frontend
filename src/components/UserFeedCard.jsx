@@ -52,6 +52,7 @@ const UserFeedCard = ({ data = {} }) => {
       setProcessingRequest(false);
     }
   };
+  // This function will be called when the user clicks the "Ignore" button. It sends a request to the backend to ignore the connection request and updates the feed accordingly.
 
   const ignoreConnectionRequest = async () => {
     try {
@@ -112,7 +113,7 @@ const UserFeedCard = ({ data = {} }) => {
             </p>
           </div>
           <div className="text-right text-sm font-medium text-slate-300">
-            {age ? `${age} yrs` : "Age unknown"}
+            {age ? `${age} Yrs` : "Age unknown"}
             <span className="block text-slate-500">
               {gender ? gender : "Gender unknown"}
             </span>
@@ -129,7 +130,7 @@ const UserFeedCard = ({ data = {} }) => {
           <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
             Description
           </h3>
-          <p className="text-sm leading-6 text-slate-300">
+          <p className="text-sm leading-6 text-slate-300 normal-case">
             {description || "This user has not added a profile summary yet."}
           </p>
         </div>

@@ -1,8 +1,17 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { baseURL } from "../utils/constants";
+import { useDispatch } from "react-redux";
+import { addRequests, removeRequest } from "../utils/requestsSlice";
 
-const UserDetailsCard = ({ user = {} }) => {
+const UserDetailsCard = ({ user = {}, type }) => {
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState("");
   const [profileView, setProfileView] = useState(false);
+  const dispatch = useDispatch();
+
   const {
+    _id,
     firstName,
     lastName,
     photoUrl,
@@ -13,7 +22,53 @@ const UserDetailsCard = ({ user = {} }) => {
     college,
     skills,
     description,
+    reqId,
   } = user;
+
+  const acceptUserRequest = async () => {
+    try {
+      if (!reqId) {
+        setError("Request ID not found");
+        return;
+      }
+      setProcessing(true);
+      const res = await axios.post(
+        baseURL + "/request/review/accepted/" + reqId,
+        {},
+        { withCredentials: true },
+      );
+      console.log(res.data);
+      // Dispatch action to update requests in store
+      dispatch(removeRequest(reqId));
+    } catch (error) {
+      setError("Error accepting user request:" + error.message);
+      console.log(error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const rejectUserRequest = async () => {
+    try {
+      if (!reqId) {
+        setError("Request ID not found");
+        return;
+      }
+      setProcessing(true);
+      const res = await axios.post(
+        baseURL + "/request/review/rejected/" + reqId,
+        {},
+        { withCredentials: true },
+      );
+      dispatch(removeRequest(reqId));
+      console.log(res.data);
+    } catch (error) {
+      setError("Error rejecting user request:" + error.message);
+      console.log(error);
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   const fullName =
     [firstName, lastName].filter(Boolean).join(" ") || "Connection";
@@ -69,7 +124,7 @@ const UserDetailsCard = ({ user = {} }) => {
       </div>
 
       {profileView && (
-        <div className="border-t border-slate-800/90 bg-slate-900/80 px-5 py-5 sm:px-6">
+        <div className="border-t border-slate-800/90 bg-slate-900/80 px-5 py-5 sm:px-6 capitalize">
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-3xl border border-slate-800 bg-slate-950 p-4">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
@@ -102,7 +157,7 @@ const UserDetailsCard = ({ user = {} }) => {
             <h4 className="text-sm uppercase tracking-[0.22em] text-slate-500">
               Description
             </h4>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
+            <p className="mt-3 text-sm leading-6 text-slate-300 normal-case">
               {description || "No additional profile information available."}
             </p>
           </div>
@@ -122,6 +177,25 @@ const UserDetailsCard = ({ user = {} }) => {
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {type === "request" && (
+            <div className="flex gap-4 items-center justify-center mt-5 max-w-sm mx-auto">
+              <button
+                disabled={processing}
+                onClick={acceptUserRequest}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 transition bg-primary"
+              >
+                Accept
+              </button>
+              <button
+                disabled={processing}
+                onClick={rejectUserRequest}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 transition bg-red-500"
+              >
+                Reject
+              </button>
             </div>
           )}
         </div>

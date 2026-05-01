@@ -1,28 +1,37 @@
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { baseURL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addFeed } from "../utils/feedSlice";
 import UserFeedCard from "./UserFeedCard";
+import LoadingPage from "./LoadingPage";
 
 const Feed = () => {
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const feedDataFromStore = useSelector((state) => state.feed);
 
   const getFeed = async () => {
     if (feedDataFromStore) return;
     try {
+      setLoading(true);
       const res = await axios.get(baseURL + "/feed", { withCredentials: true });
       const feedData = res.data.data;
       dispatch(addFeed(feedData));
     } catch (err) {
       console.log(err?.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getFeed();
   }, []);
+
+  if (loading) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="p-4 mt-5">
