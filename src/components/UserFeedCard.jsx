@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { baseURL } from "../utils/constants";
+import { useDispatch } from "react-redux";
+import { removeUserFromFeed } from "../utils/feedSlice";
 
 const Pill = ({ children, className = "" }) => (
   <span
@@ -11,7 +13,9 @@ const Pill = ({ children, className = "" }) => (
 );
 
 const UserFeedCard = ({ data = {} }) => {
+  const dispatch = useDispatch();
   const [error, setError] = useState("");
+  const [processingRequest, setProcessingRequest] = useState(false);
 
   const {
     firstName,
@@ -25,21 +29,48 @@ const UserFeedCard = ({ data = {} }) => {
     _id,
   } = data;
 
+  // This function will be called when the user clicks the "Connect" button. It sends a connection request to the backend and updates the feed accordingly.
+  //Avoids apapi call when connection req is sent as data is stored in redux, so we remove the user id from redux and from feed it automatically removes the card from feed. by this way we reduce one api call to fetch feed again after sending connection request.
   const sendConnectionRequest = async () => {
     try {
       if (!_id) {
         setError("User ID is missing. Cannot send connection request.");
         return;
       }
+      setProcessingRequest(true);
       console.log("Sending connection request to user ID:", _id);
       const res = await axios.post(
         baseURL + "/request/send/interested/" + _id,
         {},
         { withCredentials: true },
       );
+      dispatch(removeUserFromFeed(_id));
       console.log("Connection status:", res.data);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
+    } finally {
+      setProcessingRequest(false);
+    }
+  };
+
+  const ignoreConnectionRequest = async () => {
+    try {
+      if (!_id) {
+        setError("User ID is missing. Cannot ignore connection request.");
+        return;
+      }
+      setProcessingRequest(true);
+      const res = await axios.post(
+        baseURL + "/request/send/ignored/" + _id,
+        {},
+        { withCredentials: true },
+      );
+      dispatch(removeUserFromFeed(_id));
+      console.log("Ignore status:", res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setProcessingRequest(false);
     }
   };
 
@@ -106,11 +137,16 @@ const UserFeedCard = ({ data = {} }) => {
         <div className="grid gap-3 sm:grid-cols-2">
           <button
             className="btn btn-primary min-h-12"
+            disabled={processingRequest}
             onClick={sendConnectionRequest}
           >
             Connect
           </button>
-          <button className="btn btn-outline btn-secondary min-h-[48px]">
+          <button
+            className="btn btn-outline btn-secondary min-h-12"
+            disabled={processingRequest}
+            onClick={ignoreConnectionRequest}
+          >
             Ignore
           </button>
         </div>
