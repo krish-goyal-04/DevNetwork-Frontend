@@ -1,7 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { baseURL } from "../utils/constants";
-import ConnectionUserCard from "./ConnectionUserCard";
+import UserDetailsCard from "./UserDetailsCard";
+import LoadingPage from "./LoadingPage";
 
 const Connections = () => {
   const [connections, setConnections] = useState([]);
@@ -26,33 +27,36 @@ const Connections = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <div className="loading loading-spinner loading-lg text-primary"></div>
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   return (
-    <div className="min-h-screen bg-base-300 px-4 py-8">
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div className="rounded-3xl border border-base-200 bg-base-100/80 p-8 shadow-sm">
-          <h1 className="text-4xl font-semibold">Connections</h1>
-          <p className="mt-2 text-base-content/70">
-            You have{" "}
-            <span className="font-semibold text-primary">
-              {connections.length}
-            </span>{" "}
-            active network connections.
-          </p>
-        </div>
+    <div className="min-h-screen bg-base-300 px-4 py-8 ">
+      {connections.length > 0 ? (
+        <div className="mx-auto max-w-6xl space-y-8">
+          <div className="rounded-3xl border border-base-200 bg-base-100/80 p-8 shadow-sm">
+            <h1 className="text-4xl font-semibold">Connections</h1>
+            <p className="mt-2 text-base-content/70">
+              You have{" "}
+              <span className="font-semibold text-primary">
+                {connections.length}
+              </span>{" "}
+              active network connections.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 gap-8">
-          {connections.map((connection) => (
-            <ConnectionUserCard key={connection._id} user={connection} />
-          ))}
+          <div className="grid grid-cols-1 gap-8">
+            {connections.map((connection) => (
+              <UserDetailsCard key={connection._id} user={connection} />
+            ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="mx-auto max-w-3xl  rounded-3xl border border-base-200 bg-base-100/80 p-10 text-center text-base-content/70 shadow-sm">
+          You have no connections yet. Start building your network by connecting
+          with other professionals!
+        </div>
+      )}
     </div>
   );
 };

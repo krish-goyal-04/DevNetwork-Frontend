@@ -6,6 +6,7 @@ import Profile from "./components/Profile";
 import Feed from "./components/Feed";
 import Connections from "./components/Connections";
 import Requests from "./components/Requests";
+import LoadingPage from "./components/LoadingPage";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
             <Route path="/feed" element={<Feed />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/requests" element={<Requests />} />
+            <Route path="/loading" element={<LoadingPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
