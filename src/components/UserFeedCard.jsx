@@ -31,7 +31,7 @@ const UserFeedCard = ({ data = {} }) => {
 
   // This function will be called when the user clicks the "Connect" button. It sends a connection request to the backend and updates the feed accordingly.
   //Avoids apapi call when connection req is sent as data is stored in redux, so we remove the user id from redux and from feed it automatically removes the card from feed. by this way we reduce one api call to fetch feed again after sending connection request.
-  const sendConnectionRequest = async () => {
+  const manageConnectionRequest = async (status) => {
     try {
       if (!_id) {
         setError("User ID is missing. Cannot send connection request.");
@@ -40,7 +40,7 @@ const UserFeedCard = ({ data = {} }) => {
       setProcessingRequest(true);
       console.log("Sending connection request to user ID:", _id);
       const res = await axios.post(
-        baseURL + "/request/send/interested/" + _id,
+        baseURL + "/request/send/" + status + "/" + _id,
         {},
         { withCredentials: true },
       );
@@ -139,14 +139,14 @@ const UserFeedCard = ({ data = {} }) => {
           <button
             className="btn btn-primary min-h-12"
             disabled={processingRequest}
-            onClick={sendConnectionRequest}
+            onClick={() => manageConnectionRequest("interested")}
           >
             Connect
           </button>
           <button
             className="btn btn-outline btn-secondary min-h-12"
             disabled={processingRequest}
-            onClick={ignoreConnectionRequest}
+            onClick={() => manageConnectionRequest("ignored")}
           >
             Ignore
           </button>
