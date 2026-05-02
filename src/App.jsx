@@ -8,7 +8,11 @@ import Connections from "./components/Connections";
 import Requests from "./components/Requests";
 import LoadingPage from "./components/LoadingPage";
 import Signup from "./components/Signup";
-
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { baseURL } from "./utils/constants";
+import axios from "axios";
+import { addUser } from "./utils/userSlice";
 const App = () => {
   return (
     <>

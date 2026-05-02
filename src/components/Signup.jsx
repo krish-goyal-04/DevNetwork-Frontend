@@ -2,8 +2,13 @@ import axios from "axios";
 import React, { useState } from "react";
 import { baseURL } from "../utils/constants";
 import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { removeFeed } from "../utils/feedSlice";
+
 const Signup = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -68,8 +73,8 @@ const Signup = () => {
       name: "gender",
       label: "Gender",
       type: "select",
-      options: ["Male", "Female", "Other"],
-      required: false,
+      options: ["Male", "Female", "Others"],
+      required: true,
     },
     {
       name: "city",
@@ -132,19 +137,27 @@ const Signup = () => {
       }
       //Removiong empty and null values from formData before sending to backend
       const sanitizedFormData = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => {
+        Object.entries(formData).filter(([key, value]) => {
+          if (key === "confirmPassword") return false;
+          if (key === "age") return Number(value);
           return value !== "" && value !== null && value !== undefined;
         }),
       );
       const res = await axios.post(baseURL + "/signup", sanitizedFormData, {
         withCredentials: true,
       });
+
+      dispatch(removeFeed());
       console.log("Signup successful:", res.data);
-      //navigate("/login");
+      setError("");
+      return navigate("/feed");
     } catch (err) {
-      setError(
-        "Error signing up: " + (err.response?.data?.message || err.message),
-      );
+      const backendError =
+        err.response?.data?.message ||
+        err.response?.data?.error || // 👈 ADD THIS
+        err.response?.data ||
+        err.message;
+      setError("Error signing up: " + backendError);
     } finally {
       setLoading(false);
     }

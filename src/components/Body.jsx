@@ -1,5 +1,5 @@
 import NavBar from "./NavBar";
-import { Outlet, useNavigate } from "react-router";
+import { Outlet, useNavigate, useLocation } from "react-router";
 import Footer from "./Footer";
 import { baseURL } from "../utils/constants";
 import axios from "axios";
@@ -18,8 +18,15 @@ import { useEffect } from "react";
 const Body = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const userData = useSelector((state) => state.user);
+
   const fetchUser = async () => {
+    // Skip auth check for public routes
+    if (location.pathname === "/login" || location.pathname === "/signup") {
+      return;
+    }
+
     if (userData) return;
     try {
       const res = await axios.get(baseURL + "/profile", {
@@ -34,7 +41,7 @@ const Body = () => {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [location.pathname]);
   return (
     <div className="min-h-screen flex flex-col ">
       <NavBar />

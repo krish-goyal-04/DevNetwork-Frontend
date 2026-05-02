@@ -6,6 +6,7 @@ import { addFeed } from "../utils/feedSlice";
 import UserFeedCard from "./UserFeedCard";
 import LoadingPage from "./LoadingPage";
 
+//Feed Pagination has to be done
 const Feed = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
