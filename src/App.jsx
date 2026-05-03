@@ -1,18 +1,12 @@
-import NavBar from "./components/NavBar";
 import Login from "./components/Login";
-import { BrowserRouter, Routes, Route } from "react-router";
-import Body from "./components/Body";
+import Signup from "./components/Signup";
 import Profile from "./components/Profile";
 import Feed from "./components/Feed";
 import Connections from "./components/Connections";
 import Requests from "./components/Requests";
-import LoadingPage from "./components/LoadingPage";
-import Signup from "./components/Signup";
-import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import { baseURL } from "./utils/constants";
-import axios from "axios";
-import { addUser } from "./utils/userSlice";
+import Body from "./components/Body";
+import { BrowserRouter, Routes, Route } from "react-router";
+
 const App = () => {
   return (
     <>

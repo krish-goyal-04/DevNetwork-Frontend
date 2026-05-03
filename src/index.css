@@ -1,2 +1,15 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  @apply min-h-screen bg-slate-950 text-slate-100 antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}

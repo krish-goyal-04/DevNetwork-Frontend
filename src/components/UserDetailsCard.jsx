@@ -2,11 +2,12 @@ import axios from "axios";
 import React, { useState } from "react";
 import { baseURL } from "../utils/constants";
 import { useDispatch } from "react-redux";
-import { addRequests, removeRequest } from "../utils/requestsSlice";
+import { removeRequest } from "../utils/requestsSlice";
 
+// UserDetailsCard uses dark card components to present connection and request details clearly.
+// The design balances data density with readability for quick decision-making.
 const UserDetailsCard = ({ user = {}, type }) => {
   const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState("");
   const [profileView, setProfileView] = useState(false);
   const dispatch = useDispatch();
 
@@ -28,7 +29,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
   const acceptUserRequest = async () => {
     try {
       if (!reqId) {
-        setError("Request ID not found");
+        console.error("Request ID not found");
         return;
       }
       setProcessing(true);
@@ -41,8 +42,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
       // Dispatch action to update requests in store
       dispatch(removeRequest(reqId));
     } catch (error) {
-      setError("Error accepting user request:" + error.message);
-      console.log(error);
+      console.error("Error accepting user request:", error);
     } finally {
       setProcessing(false);
     }
@@ -51,7 +51,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
   const rejectUserRequest = async () => {
     try {
       if (!reqId) {
-        setError("Request ID not found");
+        console.error("Request ID not found");
         return;
       }
       setProcessing(true);
@@ -63,8 +63,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
       dispatch(removeRequest(reqId));
       console.log(res.data);
     } catch (error) {
-      setError("Error rejecting user request:" + error.message);
-      console.log(error);
+      console.error("Error rejecting user request:", error);
     } finally {
       setProcessing(false);
     }
@@ -185,7 +184,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
               <button
                 disabled={processing}
                 onClick={acceptUserRequest}
-                className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 transition bg-primary"
+                className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 transition bg-sky-500"
               >
                 Accept
               </button>

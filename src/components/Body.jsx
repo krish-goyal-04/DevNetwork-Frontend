@@ -21,34 +21,34 @@ const Body = () => {
   const location = useLocation();
   const userData = useSelector((state) => state.user);
 
-  const fetchUser = async () => {
-    // Skip auth check for public routes
-    if (location.pathname === "/login" || location.pathname === "/signup") {
-      return;
-    }
-
-    if (userData) return;
-    try {
-      const res = await axios.get(baseURL + "/profile", {
-        withCredentials: true,
-      });
-      const user = res.data.data;
-      dispatch(addUser(user));
-    } catch (err) {
-      return navigate("/login");
-    }
-  };
-
   useEffect(() => {
+    const fetchUser = async () => {
+      // Skip auth check for public routes
+      if (location.pathname === "/login" || location.pathname === "/signup") {
+        return;
+      }
+
+      if (userData) return;
+      try {
+        const res = await axios.get(baseURL + "/profile", {
+          withCredentials: true,
+        });
+        const user = res.data.data;
+        dispatch(addUser(user));
+      } catch {
+        return navigate("/login");
+      }
+    };
+
     fetchUser();
-  }, [location.pathname]);
+    // The dependencies for this useEffect include location.pathname, userData, dispatch, and navigate. This means that the effect will run whenever any of these values change. For example, if the user navigates to a different route (changing location.pathname), or if the user data in the Redux store changes (userData), the effect will run again to check if the user is authenticated and fetch their profile if necessary. If the user is not authenticated, it will navigate to the login page. This ensures that the user's authentication status is checked whenever they navigate to a new page or when their user data changes.
+  }, [location.pathname, userData, dispatch, navigate]);
   return (
-    <div className="min-h-screen flex flex-col ">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
       <NavBar />
-      <div className="grow ">
+      <div className="pt-16 flex-1">
         <Outlet />
       </div>
-
       <Footer />
     </div>
   );
