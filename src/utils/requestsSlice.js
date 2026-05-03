@@ -12,7 +12,7 @@ const requestsSlice = createSlice({
       return [...state, action.payload];
     },
     removeRequest: (state, action) => {
-      return state.filter((request) => request.reqId !== action.payload);
+      return state.filter((request) => request.connectionId !== action.payload);
     },
   },
 });

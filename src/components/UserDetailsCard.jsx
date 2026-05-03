@@ -23,24 +23,25 @@ const UserDetailsCard = ({ user = {}, type }) => {
     college,
     skills,
     description,
-    reqId,
+    connectionId,
   } = user;
+  console.log("Rendering UserDetailsCard for user:", user);
 
   const acceptUserRequest = async () => {
     try {
-      if (!reqId) {
+      if (!connectionId) {
         console.error("Request ID not found");
         return;
       }
       setProcessing(true);
       const res = await axios.post(
-        baseURL + "/request/review/accepted/" + reqId,
+        baseURL + "/request/review/accepted/" + connectionId,
         {},
         { withCredentials: true },
       );
       console.log(res.data);
       // Dispatch action to update requests in store
-      dispatch(removeRequest(reqId));
+      dispatch(removeRequest(connectionId));
     } catch (error) {
       console.error("Error accepting user request:", error);
     } finally {
@@ -50,17 +51,17 @@ const UserDetailsCard = ({ user = {}, type }) => {
 
   const rejectUserRequest = async () => {
     try {
-      if (!reqId) {
+      if (!connectionId) {
         console.error("Request ID not found");
         return;
       }
       setProcessing(true);
       const res = await axios.post(
-        baseURL + "/request/review/rejected/" + reqId,
+        baseURL + "/request/review/rejected/" + connectionId,
         {},
         { withCredentials: true },
       );
-      dispatch(removeRequest(reqId));
+      dispatch(removeRequest(connectionId));
       console.log(res.data);
     } catch (error) {
       console.error("Error rejecting user request:", error);
