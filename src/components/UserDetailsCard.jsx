@@ -24,8 +24,32 @@ const UserDetailsCard = ({ user = {}, type }) => {
     skills,
     description,
     connectionId,
+    createdAt,
   } = user;
   console.log("Rendering UserDetailsCard for user:", user);
+
+  // Function to calculate days ago from createdAt date
+  const getDaysAgo = (dateString) => {
+    if (!dateString) return null;
+
+    const createdDate = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - createdDate);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+
+    // For older dates, show weeks
+    const diffWeeks = Math.floor(diffDays / 7);
+    if (diffWeeks === 1) return "1 week ago";
+    if (diffWeeks < 4) return `${diffWeeks} weeks ago`;
+
+    // For very old dates, show months
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return "1 month ago";
+    return `${diffMonths} months ago`;
+  };
 
   const acceptUserRequest = async () => {
     try {
@@ -107,6 +131,11 @@ const UserDetailsCard = ({ user = {}, type }) => {
           <div className="capitalize">
             <h3 className="text-xl font-semibold text-white">{fullName}</h3>
             <p className="mt-1 text-sm text-slate-400">{location}</p>
+            {type === "request" && createdAt && (
+              <p className="mt-1 text-xs text-slate-500">
+                Requested {getDaysAgo(createdAt)}
+              </p>
+            )}
             <p className="mt-2 text-sm text-slate-500">
               {age ? `${age} yrs` : "Age not specified"}
               <span className="mx-2">•</span>

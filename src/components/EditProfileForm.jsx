@@ -33,6 +33,12 @@ const EditProfileForm = ({ user = {}, onClose }) => {
       const filteredData = Object.fromEntries(
         Object.entries(currData).filter(([, value]) => value !== ""),
       );
+      if (filteredData.skills && typeof filteredData.skills === "string") {
+        filteredData.skills = filteredData.skills
+          .split(",")
+          .map((skill) => skill.trim())
+          .filter((skill) => skill !== "");
+      }
       const res = await axios.patch(baseURL + "/profile/edit", filteredData, {
         withCredentials: true,
       });

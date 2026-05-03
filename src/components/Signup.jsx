@@ -144,6 +144,15 @@ const Signup = () => {
           return value !== "" && value !== null && value !== undefined;
         }),
       );
+
+      // Convert comma-separated skills string into an array
+      if (sanitizedFormData.skills) {
+        sanitizedFormData.skills = sanitizedFormData.skills
+          .split(",")
+          .map((skill) => skill.trim())
+          .filter((skill) => skill !== "");
+      }
+
       const res = await axios.post(baseURL + "/signup", sanitizedFormData, {
         withCredentials: true,
       });
