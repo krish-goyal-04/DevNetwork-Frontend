@@ -5,6 +5,7 @@ import LoadingPage from "./LoadingPage";
 import UserDetailsCard from "./UserDetailsCard";
 import { useDispatch, useSelector } from "react-redux";
 import { setRequests } from "../utils/requestsSlice";
+import { ToastNotification } from "./ToastNotification";
 
 // Requests page presents received requests in a dark, approachable layout.
 // Clear feedback and button states make it easy to accept or reject connections without visual clutter.
@@ -24,7 +25,9 @@ const Requests = () => {
         dispatch(setRequests(res.data.data || []));
         console.log(res.data);
       } catch (err) {
-        console.error(err.response?.data?.message || err.message);
+        const message = err.response?.data?.message || err.message;
+        console.error(message);
+        ToastNotification("Unable to load requests", message, "error");
       } finally {
         setLoading(false);
       }

@@ -68,7 +68,7 @@ const Login = () => {
       {/* Hero Section */}
       <div className="flex flex-1 min-h-full">
         {/* Left Side - Hero Content */}
-        <div className="hidden lg:flex  bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 flex-col justify-center relative overflow-hidden">
+        <div className="hidden lg:flex  bg-linear-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 flex-col justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative z-10 text-slate-100">
             <h1 className="text-5xl font-bold mb-6 leading-tight">

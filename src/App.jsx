@@ -6,10 +6,12 @@ import Connections from "./components/Connections";
 import Requests from "./components/Requests";
 import Body from "./components/Body";
 import { BrowserRouter, Routes, Route } from "react-router";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
     <>
+      <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Body />}>

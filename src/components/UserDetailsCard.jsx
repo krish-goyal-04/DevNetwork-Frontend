@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { baseURL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { removeRequest } from "../utils/requestsSlice";
+import { ToastNotification } from "./ToastNotification";
 
 // UserDetailsCard uses dark card components to present connection and request details clearly.
 // The design balances data density with readability for quick decision-making.
@@ -66,8 +67,18 @@ const UserDetailsCard = ({ user = {}, type }) => {
       console.log(res.data);
       // Dispatch action to update requests in store
       dispatch(removeRequest(connectionId));
+      ToastNotification(
+        "Request accepted",
+        `You accepted ${fullName}'s connection request.`,
+        "success",
+      );
     } catch (error) {
       console.error("Error accepting user request:", error);
+      ToastNotification(
+        "Unable to accept request",
+        error.response?.data?.message || error.message,
+        "error",
+      );
     } finally {
       setProcessing(false);
     }
@@ -87,8 +98,18 @@ const UserDetailsCard = ({ user = {}, type }) => {
       );
       dispatch(removeRequest(connectionId));
       console.log(res.data);
+      ToastNotification(
+        "Request rejected",
+        `You rejected ${fullName}'s connection request.`,
+        "error",
+      );
     } catch (error) {
       console.error("Error rejecting user request:", error);
+      ToastNotification(
+        "Unable to reject request",
+        error.response?.data?.message || error.message,
+        "error",
+      );
     } finally {
       setProcessing(false);
     }

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { baseURL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { removeUserFromFeed } from "../utils/feedSlice";
+import { ToastNotification } from "./ToastNotification";
 
 // UserFeedCard presents candidate cards in a dark UI with strong contrast.
 // Action buttons and badges are designed to make connection requests clear and easy to interact with.
@@ -47,9 +48,22 @@ const UserFeedCard = ({ data = {} }) => {
         { withCredentials: true },
       );
       dispatch(removeUserFromFeed(_id));
+      status === "interested"
+        ? ToastNotification(
+            "Connection request sent",
+            `You sent a connection request to ${firstName} ${lastName || ""}`.trim(),
+            "success",
+          )
+        : ToastNotification(
+            "Connection request skipped",
+            `You skipped sending a connection request to ${firstName} ${lastName || ""}`.trim(),
+            "error",
+          );
       console.log("Connection status:", res.data);
     } catch (err) {
+      const message = err.response?.data?.message || err.message;
       setError(err.response?.data?.message || err.message);
+      ToastNotification("Request failed", message, "error");
     } finally {
       setProcessingRequest(false);
     }
@@ -79,7 +93,7 @@ const UserFeedCard = ({ data = {} }) => {
                 className="w-16 h-16 rounded-full object-cover border-2 border-slate-700"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-sky-500 to-slate-700 flex items-center justify-center text-white font-bold text-lg border-2 border-slate-700">
+              <div className="w-16 h-16 rounded-full bg-linear-to-br from-sky-500 to-slate-700 flex items-center justify-center text-white font-bold text-lg border-2 border-slate-700">
                 {firstName.charAt(0)}
                 {lastName ? lastName.charAt(0) : ""}
               </div>

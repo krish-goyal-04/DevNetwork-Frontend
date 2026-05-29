@@ -8,6 +8,7 @@ import { addUser } from "../utils/userSlice";
 import { addRequests, handleRequestReview } from "../utils/requestsSlice";
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
+import { ToastNotification } from "./ToastNotification";
 
 // This component is responsible for rendering the main layout of the application, including the NavBar and Footer. It also contains an Outlet component that will render the child routes defined in App.jsx. Additionally, it has a fetchUser function that makes an API call to retrieve the user's profile information and dispatches it to the Redux store.
 
@@ -65,6 +66,10 @@ const Body = () => {
     // Action: Add the flattened request object to Redux requests slice.
     // Result: Requests.jsx page updates immediately without refresh to show the new request.
     socket.on("request:received", (payload) => {
+      ToastNotification(
+        payload.fromUser.firstName,
+        " sent you a connection request.",
+      ); // Show a toast notification with the sender's name
       const transformedRequest = {
         ...payload.fromUser,
         connectionId: payload.connectionId,
@@ -83,8 +88,17 @@ const Body = () => {
     socket.on("request:reviewed", (payload) => {
       console.log("Request reviewed:", payload);
       dispatch(handleRequestReview(payload));
-      // TODO: Show a notification/toast: "Your connection request to [name] was [accepted/rejected]"
-      // TODO: If accepted, optionally update connections list or feed state
+
+      const name = payload.toUser
+        ? `${payload.toUser.firstName || "User"} ${payload.toUser.lastName || ""}`.trim()
+        : "User";
+      const isAccepted = payload.status === "accepted";
+
+      ToastNotification(
+        isAccepted ? "Request accepted" : "Request rejected",
+        `${name} ${isAccepted ? "accepted" : "rejected"} your connection request.`,
+        isAccepted ? "success" : "error",
+      );
     });
 
     socket.on("disconnect", () => {

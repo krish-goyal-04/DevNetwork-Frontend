@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { baseURL } from "../utils/constants";
 import UserDetailsCard from "./UserDetailsCard";
 import LoadingPage from "./LoadingPage";
+import { ToastNotification } from "./ToastNotification";
 
 // Connections uses a structured dark layout with card-based results and a clear empty state.
 // The design keeps user actions visible while preserving readability on large lists.
@@ -18,7 +19,9 @@ const Connections = () => {
       });
       setConnections(res.data.data || []);
     } catch (err) {
-      console.error(err.response?.data?.message || err.message);
+      const message = err.response?.data?.message || err.message;
+      console.error(message);
+      ToastNotification("Unable to load connections", message, "error");
     } finally {
       setLoading(false);
     }

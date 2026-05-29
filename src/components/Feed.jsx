@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addFeed } from "../utils/feedSlice";
 import UserFeedCard from "./UserFeedCard";
 import LoadingPage from "./LoadingPage";
+import { ToastNotification } from "./ToastNotification";
 
 //Feed Pagination has to be done
 const Feed = () => {
@@ -23,7 +24,9 @@ const Feed = () => {
         const feedData = res.data.data;
         dispatch(addFeed(feedData));
       } catch (err) {
-        console.log(err?.response?.data?.message || err.message);
+        const message = err?.response?.data?.message || err.message;
+        console.error(message);
+        ToastNotification("Unable to load feed", message, "error");
       } finally {
         setLoading(false);
       }
