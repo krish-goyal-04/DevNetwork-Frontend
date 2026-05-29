@@ -5,7 +5,9 @@ import { baseURL } from "../utils/constants";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
-import { useEffect } from "react";
+import { addRequests, handleRequestReview } from "../utils/requestsSlice";
+import { useEffect, useRef } from "react";
+import { io } from "socket.io-client";
 
 // This component is responsible for rendering the main layout of the application, including the NavBar and Footer. It also contains an Outlet component that will render the child routes defined in App.jsx. Additionally, it has a fetchUser function that makes an API call to retrieve the user's profile information and dispatches it to the Redux store.
 
@@ -20,6 +22,7 @@ const Body = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = useSelector((state) => state.user);
+  const socketRef = useRef(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -41,8 +44,67 @@ const Body = () => {
     };
 
     fetchUser();
-    // The dependencies for this useEffect include location.pathname, userData, dispatch, and navigate. This means that the effect will run whenever any of these values change. For example, if the user navigates to a different route (changing location.pathname), or if the user data in the Redux store changes (userData), the effect will run again to check if the user is authenticated and fetch their profile if necessary. If the user is not authenticated, it will navigate to the login page. This ensures that the user's authentication status is checked whenever they navigate to a new page or when their user data changes.
   }, [location.pathname, userData, dispatch, navigate]);
+
+  useEffect(() => {
+    if (!userData || socketRef.current) return;
+
+    const socket = io(baseURL, {
+      withCredentials: true,
+      transports: ["websocket"],
+    });
+
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+
+    // Event: request:received
+    // Triggered when ANOTHER user sends a connection request to the logged-in user.
+    // Payload: { connectionId, status, fromUser: {...}, createdAt }
+    // Transform to match REST API format: { ...fromUser, connectionId, createdAt, status }
+    // Action: Add the flattened request object to Redux requests slice.
+    // Result: Requests.jsx page updates immediately without refresh to show the new request.
+    socket.on("request:received", (payload) => {
+      const transformedRequest = {
+        ...payload.fromUser,
+        connectionId: payload.connectionId,
+        createdAt: payload.createdAt,
+        status: payload.status,
+      };
+      dispatch(addRequests(transformedRequest));
+    });
+
+    // Event: request:reviewed
+    // Triggered when a request WE sent is reviewed (accepted or rejected) by the other user.
+    // Payload: { connectionId, status, toUserId, toUser }
+    // Action: Dispatch handleRequestReview to log and prepare for future features (notifications, feed updates).
+    // Note: The receiver already removed the request via removeRequest in UserDetailsCard.
+    // Here we handle the SENDER side: they may want to see that their request was reviewed.
+    socket.on("request:reviewed", (payload) => {
+      console.log("Request reviewed:", payload);
+      dispatch(handleRequestReview(payload));
+      // TODO: Show a notification/toast: "Your connection request to [name] was [accepted/rejected]"
+      // TODO: If accepted, optionally update connections list or feed state
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    socketRef.current = socket;
+    //socket.connect();
+    // Cleanup function to disconnect the socket when the component unmounts or userData changes
+    // This ensures that we don't have multiple socket connections open at the same time, which can lead to memory leaks and unexpected behavior. By disconnecting the socket when the component unmounts or when userData changes (e.g., when a user logs out), we can ensure that we are properly managing our WebSocket connections and resources.
+    return () => {
+      socket.off("request:received");
+      socket.off("request:reviewed");
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [userData, dispatch]);
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
       <NavBar />

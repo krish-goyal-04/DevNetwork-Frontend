@@ -5,7 +5,7 @@ import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router";
 import { baseURL } from "../utils/constants";
 import { Link } from "react-router";
-
+import { io } from "socket.io-client";
 // Login page uses a dark surface with easy-to-read input labels and strong contrast.
 // The centered card layout keeps the focus on authentication and provides a modern, calm sign-in experience.
 const Login = () => {
@@ -49,6 +49,12 @@ const Login = () => {
       );
       const user = res.data.data;
       dispatch(addUser(user));
+      const socket = io(baseURL, {
+        withCredentials: true,
+      });
+      socket.on("connect", () => {
+        console.log("Connected to Socket.IO server with ID: " + socket.id);
+      });
       return navigate("/feed");
     } catch (err) {
       setError(err?.response?.data?.message || "Something went wrong");
@@ -62,7 +68,7 @@ const Login = () => {
       {/* Hero Section */}
       <div className="flex flex-1 min-h-full">
         {/* Left Side - Hero Content */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 flex-col justify-center relative overflow-hidden">
+        <div className="hidden lg:flex  bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-12 flex-col justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative z-10 text-slate-100">
             <h1 className="text-5xl font-bold mb-6 leading-tight">

@@ -6,9 +6,7 @@ import appStore from "./utils/appStore";
 
 //All the components in <App /> including app can access this redux store named appStore
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Provider store={appStore}>
-      <App />
-    </Provider>
-  </StrictMode>,
+  <Provider store={appStore}>
+    <App />
+  </Provider>,
 );
