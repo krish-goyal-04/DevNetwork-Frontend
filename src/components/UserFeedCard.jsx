@@ -41,7 +41,6 @@ const UserFeedCard = ({ data = {} }) => {
         return;
       }
       setProcessingRequest(true);
-      console.log("Sending connection request to user ID:", _id);
       const res = await axios.post(
         baseURL + "/request/send/" + status + "/" + _id,
         {},
