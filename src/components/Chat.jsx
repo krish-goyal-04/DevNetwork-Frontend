@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
+import { useSelector } from "react-redux";
 import { baseURL } from "../utils/constants";
 import { useSocket } from "../context/SocketContext";
 import { ToastNotification } from "./ToastNotification";
@@ -8,6 +9,7 @@ import { ToastNotification } from "./ToastNotification";
 const Chat = () => {
   const { userId: participantId } = useParams();
   const socket = useSocket();
+  const currentUser = useSelector((state) => state.user);
   // partner holds the details of the user we are chatting with
   const [partner, setPartner] = useState(null);
   // messages is the list of chat messages in this conversation
@@ -173,7 +175,9 @@ const Chat = () => {
                 ) : (
                   <div className="space-y-4">
                     {messages.map((message) => {
-                      const isFromSelf = message.fromSelf === true;
+                      const isFromSelf = currentUser
+                        ? message.fromUserId === currentUser._id
+                        : message.fromSelf === true;
                       return (
                         <div
                           key={message._id}
