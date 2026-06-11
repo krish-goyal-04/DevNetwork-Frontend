@@ -20,6 +20,7 @@ const Chat = () => {
   const [isJoining, setIsJoining] = useState(false);
   const messageEndRef = useRef(null);
 
+  // Load chat details and messages when the component mounts or participantId changes
   useEffect(() => {
     const loadChat = async () => {
       try {
@@ -55,6 +56,7 @@ const Chat = () => {
     }
   }, [participantId]);
 
+  // Listen for incoming chat messages via the socket connection
   useEffect(() => {
     if (!socket || !participantId) return;
 
