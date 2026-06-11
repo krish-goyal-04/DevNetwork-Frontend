@@ -6,8 +6,9 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { addRequests, handleRequestReview } from "../utils/requestsSlice";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { SocketContext } from "../context/SocketContext";
 import { ToastNotification } from "./ToastNotification";
 
 // This component is responsible for rendering the main layout of the application, including the NavBar and Footer. It also contains an Outlet component that will render the child routes defined in App.jsx. Additionally, it has a fetchUser function that makes an API call to retrieve the user's profile information and dispatches it to the Redux store.
@@ -23,6 +24,7 @@ const Body = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = useSelector((state) => state.user);
+  const [socket, setSocket] = useState(null);
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -101,32 +103,47 @@ const Body = () => {
       );
     });
 
+    socket.on("notification:message", (payload) => {
+      if (location.pathname.startsWith("/chat/")) return;
+      ToastNotification(
+        "New message",
+        payload.snippet || "You received a new message.",
+        "info",
+      );
+    });
+
     socket.on("disconnect", () => {
       console.log("Socket disconnected");
+      setSocket(null);
     });
 
     socketRef.current = socket;
-    //socket.connect();
-    // Cleanup function to disconnect the socket when the component unmounts or userData changes
-    // This ensures that we don't have multiple socket connections open at the same time, which can lead to memory leaks and unexpected behavior. By disconnecting the socket when the component unmounts or when userData changes (e.g., when a user logs out), we can ensure that we are properly managing our WebSocket connections and resources.
+    setSocket(socket);
+
     return () => {
       socket.off("request:received");
       socket.off("request:reviewed");
+      socket.off("notification:message");
       socket.off("connect");
       socket.off("disconnect");
       socket.disconnect();
       socketRef.current = null;
+      setSocket(null);
     };
   }, [userData, dispatch]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      <NavBar />
-      <div className="pt-16 flex-1">
-        <Outlet />
+    // SocketContext.Provider makes the socket available to every page and nested component.
+    // It is created once in Body.jsx and then consumed by child components via useSocket().
+    <SocketContext.Provider value={socket}>
+      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+        <NavBar />
+        <div className="pt-16 flex-1">
+          <Outlet />
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </SocketContext.Provider>
   );
 };
 export default Body;

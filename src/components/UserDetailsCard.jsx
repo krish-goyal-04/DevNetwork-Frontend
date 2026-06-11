@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { Link } from "react-router";
 import { baseURL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { removeRequest } from "../utils/requestsSlice";
@@ -165,12 +166,22 @@ const UserDetailsCard = ({ user = {}, type }) => {
           </div>
         </div>
 
-        <button
-          onClick={() => setProfileView((prev) => !prev)}
-          className="btn btn-sm btn-primary"
-        >
-          {profileView ? "Hide details" : "View details"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {type !== "request" && connectionId && (
+            <Link
+              to={`/chat/${_id}`}
+              className="rounded-2xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+            >
+              Chat
+            </Link>
+          )}
+          <button
+            onClick={() => setProfileView((prev) => !prev)}
+            className="btn btn-sm btn-primary"
+          >
+            {profileView ? "Hide details" : "View details"}
+          </button>
+        </div>
       </div>
 
       {profileView && (

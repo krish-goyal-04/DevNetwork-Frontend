@@ -4,6 +4,7 @@ import Profile from "./components/Profile";
 import Feed from "./components/Feed";
 import Connections from "./components/Connections";
 import Requests from "./components/Requests";
+import Chat from "./components/Chat";
 import Body from "./components/Body";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Toaster } from "react-hot-toast";
@@ -19,6 +20,7 @@ const App = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/connections" element={<Connections />} />
+            <Route path="/chat/:userId" element={<Chat />} />
             <Route path="/requests" element={<Requests />} />
             <Route path="/signup" element={<Signup />} />
           </Route>

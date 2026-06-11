@@ -5,7 +5,6 @@ import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router";
 import { baseURL } from "../utils/constants";
 import { Link } from "react-router";
-import { io } from "socket.io-client";
 // Login page uses a dark surface with easy-to-read input labels and strong contrast.
 // The centered card layout keeps the focus on authentication and provides a modern, calm sign-in experience.
 const Login = () => {
@@ -49,12 +48,6 @@ const Login = () => {
       );
       const user = res.data.data;
       dispatch(addUser(user));
-      const socket = io(baseURL, {
-        withCredentials: true,
-      });
-      socket.on("connect", () => {
-        console.log("Connected to Socket.IO server with ID: " + socket.id);
-      });
       return navigate("/feed");
     } catch (err) {
       setError(err?.response?.data?.message || "Something went wrong");
