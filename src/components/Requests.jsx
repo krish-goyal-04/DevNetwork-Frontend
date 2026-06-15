@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { baseURL } from "../utils/constants";
 import LoadingPage from "./LoadingPage";
 import UserDetailsCard from "./UserDetailsCard";
@@ -13,6 +14,7 @@ const Requests = () => {
   const [loading, setLoading] = useState(false);
   const requests = useSelector((state) => state.requests);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -23,7 +25,6 @@ const Requests = () => {
           withCredentials: true,
         });
         dispatch(setRequests(res.data.data || []));
-        console.log(res.data);
       } catch (err) {
         const message = err.response?.data?.message || err.message;
         console.error(message);
@@ -43,44 +44,32 @@ const Requests = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8 flex flex-col gap-4 border-b border-slate-800 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-emerald-400">
+              Incoming requests
+            </p>
+            <h1 className="mt-2 text-3xl font-bold text-white">
+              Connection Requests
+            </h1>
+            <p className="mt-2 text-slate-400">
+              {requests.length}{" "}
+              {requests.length === 1 ? "pending request" : "pending requests"}
+              {requests.length > 0 ? " waiting for review." : "."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/feed")}
+            className="h-11 rounded-lg bg-sky-500 px-5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+          >
+            Discover developers
+          </button>
+        </div>
+
         {requests.length > 0 ? (
           <div className="space-y-8">
-            {/* Header */}
-            <div className="bg-slate-900 rounded-xl shadow-lg border border-slate-800 p-8">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6 text-emerald-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-white">
-                    Connection Requests
-                  </h1>
-                  <p className="text-slate-400 mt-1">
-                    You have{" "}
-                    <span className="font-semibold text-emerald-400">
-                      {requests.length}
-                    </span>{" "}
-                    {requests.length === 1
-                      ? "pending request"
-                      : "pending requests"}
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Requests Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {requests.map((connection) => (
                 <UserDetailsCard
@@ -117,7 +106,8 @@ const Requests = () => {
                 engaging with the community to grow your network!
               </p>
               <button
-                onClick={() => (window.location.href = "/feed")}
+                type="button"
+                onClick={() => navigate("/feed")}
                 className="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
               >
                 Explore Feed

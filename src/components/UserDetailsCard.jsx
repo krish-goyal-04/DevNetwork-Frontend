@@ -6,8 +6,44 @@ import { useDispatch } from "react-redux";
 import { removeRequest } from "../utils/requestsSlice";
 import { ToastNotification } from "./ToastNotification";
 
-// UserDetailsCard uses dark card components to present connection and request details clearly.
-// The design balances data density with readability for quick decision-making.
+const getDaysAgo = (dateString) => {
+  if (!dateString) return null;
+
+  const createdDate = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor(Math.abs(now - createdDate) / 86400000);
+
+  if (diffDays === 0) return "today";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 7) return `${diffDays} days ago`;
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks === 1) return "1 week ago";
+  if (diffWeeks < 4) return `${diffWeeks} weeks ago`;
+
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths === 1) return "1 month ago";
+  return `${diffMonths} months ago`;
+};
+
+const normalizeSkills = (skills) => {
+  if (Array.isArray(skills)) {
+    return skills
+      .flatMap((skill) => skill.split(","))
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof skills === "string") {
+    return skills
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
 const UserDetailsCard = ({ user = {}, type }) => {
   const [processing, setProcessing] = useState(false);
   const [profileView, setProfileView] = useState(false);
@@ -28,115 +64,47 @@ const UserDetailsCard = ({ user = {}, type }) => {
     connectionId,
     createdAt,
   } = user;
-  console.log("Rendering UserDetailsCard for user:", user);
-
-  // Function to calculate days ago from createdAt date
-  const getDaysAgo = (dateString) => {
-    if (!dateString) return null;
-
-    const createdDate = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - createdDate);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 7) return `${diffDays} days ago`;
-
-    // For older dates, show weeks
-    const diffWeeks = Math.floor(diffDays / 7);
-    if (diffWeeks === 1) return "1 week ago";
-    if (diffWeeks < 4) return `${diffWeeks} weeks ago`;
-
-    // For very old dates, show months
-    const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths === 1) return "1 month ago";
-    return `${diffMonths} months ago`;
-  };
-
-  const acceptUserRequest = async () => {
-    try {
-      if (!connectionId) {
-        console.error("Request ID not found");
-        return;
-      }
-      setProcessing(true);
-      const res = await axios.post(
-        baseURL + "/request/review/accepted/" + connectionId,
-        {},
-        { withCredentials: true },
-      );
-      console.log(res.data);
-      // Dispatch action to update requests in store
-      dispatch(removeRequest(connectionId));
-      ToastNotification(
-        "Request accepted",
-        `You accepted ${fullName}'s connection request.`,
-        "success",
-      );
-    } catch (error) {
-      console.error("Error accepting user request:", error);
-      ToastNotification(
-        "Unable to accept request",
-        error.response?.data?.message || error.message,
-        "error",
-      );
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const rejectUserRequest = async () => {
-    try {
-      if (!connectionId) {
-        console.error("Request ID not found");
-        return;
-      }
-      setProcessing(true);
-      const res = await axios.post(
-        baseURL + "/request/review/rejected/" + connectionId,
-        {},
-        { withCredentials: true },
-      );
-      dispatch(removeRequest(connectionId));
-      console.log(res.data);
-      ToastNotification(
-        "Request rejected",
-        `You rejected ${fullName}'s connection request.`,
-        "error",
-      );
-    } catch (error) {
-      console.error("Error rejecting user request:", error);
-      ToastNotification(
-        "Unable to reject request",
-        error.response?.data?.message || error.message,
-        "error",
-      );
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   const fullName =
     [firstName, lastName].filter(Boolean).join(" ") || "Connection";
   const location =
     [city, state].filter(Boolean).join(", ") || "Unknown location";
-  const skillItems = Array.isArray(skills)
-    ? skills
-        .flatMap((skill) => skill.split(","))
-        .map((skill) => skill.trim())
-        .filter(Boolean)
-    : typeof skills === "string"
-      ? skills
-          .split(",")
-          .map((skill) => skill.trim())
-          .filter(Boolean)
-      : [];
+  const skillItems = normalizeSkills(skills);
+  const requestedAgo = getDaysAgo(createdAt);
+
+  const reviewRequest = async (status) => {
+    try {
+      if (!connectionId) return;
+
+      setProcessing(true);
+      await axios.post(
+        `${baseURL}/request/review/${status}/${connectionId}`,
+        {},
+        { withCredentials: true },
+      );
+      dispatch(removeRequest(connectionId));
+
+      ToastNotification(
+        status === "accepted" ? "Request accepted" : "Request rejected",
+        `${fullName}'s request was ${status}.`,
+        status === "accepted" ? "success" : "error",
+      );
+    } catch (error) {
+      ToastNotification(
+        "Unable to review request",
+        error.response?.data?.message || error.message,
+        "error",
+      );
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   return (
-    <article className="w-full max-w-4xl mx-auto overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.85)] transition hover:-translate-y-0.5">
-      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 overflow-hidden rounded-2xl bg-slate-800 ring-1 ring-slate-700 shadow-inner">
+    <article className="w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/10 transition hover:border-slate-700">
+      <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
             <img
               src={
                 photoUrl ||
@@ -147,22 +115,24 @@ const UserDetailsCard = ({ user = {}, type }) => {
                 event.currentTarget.src =
                   "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80";
               }}
-              className="h-full w-full object-cover object-center"
+              className="h-full w-full object-cover"
             />
           </div>
-          <div className="capitalize">
-            <h3 className="text-xl font-semibold text-white">{fullName}</h3>
+
+          <div className="min-w-0 capitalize">
+            <h3 className="truncate text-xl font-semibold text-white">
+              {fullName}
+            </h3>
             <p className="mt-1 text-sm text-slate-400">{location}</p>
-            {type === "request" && createdAt && (
-              <p className="mt-1 text-xs text-slate-500">
-                Requested {getDaysAgo(createdAt)}
-              </p>
-            )}
             <p className="mt-2 text-sm text-slate-500">
               {age ? `${age} yrs` : "Age not specified"}
-              <span className="mx-2">•</span>
-              {gender ? gender : "Gender not specified"}
+              {gender ? ` | ${gender}` : ""}
             </p>
+            {type === "request" && requestedAgo && (
+              <p className="mt-1 text-xs text-slate-500">
+                Requested {requestedAgo}
+              </p>
+            )}
           </div>
         </div>
 
@@ -170,14 +140,15 @@ const UserDetailsCard = ({ user = {}, type }) => {
           {type !== "request" && connectionId && (
             <Link
               to={`/chat/${_id}`}
-              className="rounded-2xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
             >
               Chat
             </Link>
           )}
           <button
+            type="button"
             onClick={() => setProfileView((prev) => !prev)}
-            className="btn btn-sm btn-primary"
+            className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
           >
             {profileView ? "Hide details" : "View details"}
           </button>
@@ -185,75 +156,76 @@ const UserDetailsCard = ({ user = {}, type }) => {
       </div>
 
       {profileView && (
-        <div className="border-t border-slate-800/90 bg-slate-900/80 px-5 py-5 sm:px-6 capitalize">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-3xl border border-slate-800 bg-slate-950 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+        <div className="border-t border-slate-800 bg-slate-950/40 p-5">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+              <p className="text-xs font-semibold uppercase text-slate-500">
                 College
               </p>
-              <p className="mt-3 text-sm text-slate-200">
+              <p className="mt-2 text-sm text-slate-200">
                 {college || "Not available"}
               </p>
             </div>
-            <div className="rounded-3xl border border-slate-800 bg-slate-950 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+              <p className="text-xs font-semibold uppercase text-slate-500">
                 Location
               </p>
-              <p className="mt-3 text-sm text-slate-200">{location}</p>
+              <p className="mt-2 text-sm text-slate-200">{location}</p>
             </div>
-            <div className="rounded-3xl border border-slate-800 bg-slate-950 p-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-                Age / Gender
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+              <p className="text-xs font-semibold uppercase text-slate-500">
+                Profile
               </p>
-              <p className="mt-3 text-sm text-slate-200">
-                {age ? `${age} yrs` : "N/A"}
+              <p className="mt-2 text-sm text-slate-200">
+                {age ? `${age} yrs` : "Age not specified"}
               </p>
               <p className="text-sm text-slate-400">
-                {gender ? gender : "N/A"}
+                {gender || "Gender not specified"}
               </p>
             </div>
           </div>
 
-          <div className="mt-5 rounded-3xl border border-slate-800 bg-slate-950 p-5">
-            <h4 className="text-sm uppercase tracking-[0.22em] text-slate-500">
-              Description
-            </h4>
-            <p className="mt-3 text-sm leading-6 text-slate-300 normal-case">
+          <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
+            <p className="text-xs font-semibold uppercase text-slate-500">
+              About
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
               {description || "No additional profile information available."}
             </p>
           </div>
 
-          {skillItems.length > 0 && (
-            <div className="mt-5">
-              <h4 className="text-sm uppercase tracking-[0.22em] text-slate-500">
-                Skills
-              </h4>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {skillItems.map((skill, index) => (
-                  <span
-                    key={`${skill}-${index}`}
-                    className="inline-flex rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {skillItems.length ? (
+              skillItems.map((skill, index) => (
+                <span
+                  key={`${skill}-${index}`}
+                  className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300"
+                >
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300">
+                No skills listed
+              </span>
+            )}
+          </div>
 
           {type === "request" && (
-            <div className="flex gap-4 items-center justify-center mt-5 max-w-sm mx-auto">
+            <div className="mt-5 flex max-w-sm gap-3">
               <button
+                type="button"
                 disabled={processing}
-                onClick={acceptUserRequest}
-                className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 transition bg-sky-500"
+                onClick={() => reviewRequest("accepted")}
+                className="h-11 flex-1 rounded-lg bg-sky-500 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Accept
               </button>
               <button
+                type="button"
                 disabled={processing}
-                onClick={rejectUserRequest}
-                className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 transition bg-red-500"
+                onClick={() => reviewRequest("rejected")}
+                className="h-11 flex-1 rounded-lg border border-slate-700 bg-slate-800 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Reject
               </button>

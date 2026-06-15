@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { removeUser } from "../utils/userSlice";
 import { useDispatch } from "react-redux";
 import { baseURL } from "../utils/constants";
@@ -12,6 +12,11 @@ const NavBar = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const navItems = [
+    { to: "/feed", label: "Discover" },
+    { to: "/connections", label: "Network" },
+    { to: "/requests", label: "Requests" },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -24,7 +29,7 @@ const NavBar = () => {
   };
 
   return (
-    <div className="bg-slate-950 border-b border-slate-800 sticky top-0 z-50 shadow-black/10">
+    <div className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 shadow-sm shadow-black/10 backdrop-blur">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -41,84 +46,33 @@ const NavBar = () => {
 
           {/* Navigation Links */}
           {user && (
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/feed"
-                className="text-slate-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 inline mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            <nav className="hidden md:flex items-center rounded-full border border-slate-800 bg-slate-900/70 p-1">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `rounded-full px-4 py-2 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-slate-100 text-slate-950"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`
+                  }
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
-                  />
-                </svg>
-                Feed
-              </Link>
-              <Link
-                to="/connections"
-                className="text-slate-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors"
-              >
-                <svg
-                  className="w-5 h-5 inline mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                My Network
-              </Link>
-              <Link
-                to="/requests"
-                className="text-slate-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors relative"
-              >
-                <svg
-                  className="w-5 h-5 inline mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-5 5v-5zM4.868 12.683A17.925 17.925 0 0112 21c7.962 0 12-1.21 12-2.683m-12 2.683a17.925 17.925 0 01-7.132-8.317M12 21c4.411 0 8-4.03 8-9s-3.589-9-8-9-8 4.03-8 9a9.06 9.06 0 001.832 5.683L4 21l4.868-2.317z"
-                  />
-                </svg>
-                Messages
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  3
-                </span>
-              </Link>
+                  {item.label}
+                </NavLink>
+              ))}
             </nav>
           )}
 
           {/* User Menu */}
           {user && (
             <div className="flex items-center space-x-4">
-              <div className="hidden sm:flex items-center space-x-2 text-sm text-slate-300">
-                <span>Welcome,</span>
-                <span className="font-semibold text-white">
+              <div className="hidden sm:block text-right">
+                <p className="text-xs text-slate-500">Signed in as</p>
+                <p className="text-sm font-semibold text-white">
                   {user.firstName}
-                </span>
+                </p>
               </div>
 
               <div className="dropdown dropdown-end">
@@ -167,7 +121,7 @@ const NavBar = () => {
                   </li>
                   <li>
                     <Link
-                      to="/requests"
+                      to="/feed"
                       className="text-slate-100 hover:bg-slate-900"
                     >
                       <svg
@@ -181,6 +135,27 @@ const NavBar = () => {
                           strokeLinejoin="round"
                           strokeWidth={2}
                           d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                      Discover Developers
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/requests"
+                      className="text-slate-100 hover:bg-slate-900"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                       </svg>
                       Connection Requests
@@ -204,7 +179,7 @@ const NavBar = () => {
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                       </svg>
-                      My Connections
+                      My Network
                     </Link>
                   </li>
                   <li>

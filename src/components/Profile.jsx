@@ -2,17 +2,27 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import EditProfileForm from "./EditProfileForm";
 
-// Profile page features dark card sections, a clean personal summary, and well-spaced information blocks.
-// The edit profile flow is accessible and keeps the main UI uncluttered while providing strong visual hierarchy.
+const DetailRow = ({ label, value }) => (
+  <div className="flex items-start justify-between gap-4 border-b border-slate-800 py-3 last:border-b-0">
+    <span className="text-sm text-slate-500">{label}</span>
+    <span className="max-w-[60%] text-right text-sm font-medium text-slate-200">
+      {value || "Not specified"}
+    </span>
+  </div>
+);
+
 const Profile = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const profileData = useSelector((state) => state.user);
-  if (!profileData)
+
+  if (!profileData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-400">
+        Loading profile...
       </div>
     );
+  }
+
   const {
     firstName,
     lastName,
@@ -26,154 +36,143 @@ const Profile = () => {
     skills,
     emailId,
   } = profileData;
-  const profileAttributes = [
-    { Label: "First Name", value: firstName },
-    { Label: "Last Name", value: lastName },
-    { Label: "Gender", value: gender },
-    { Label: "Age", value: age },
-    { Label: "City", value: city },
-    { Label: "College", value: college },
-    { Label: "State", value: state },
-    { Label: "Email ID", value: emailId },
+
+  const fullName = [firstName, lastName].filter(Boolean).join(" ") || "User";
+  const location =
+    [city, state].filter(Boolean).join(", ") || "Location not specified";
+  const skillItems = Array.isArray(skills)
+    ? skills.filter(Boolean)
+    : skills
+      ? [skills]
+      : [];
+  const completionItems = [
+    firstName,
+    emailId,
+    gender,
+    photoUrl,
+    description,
+    city || state,
+    college,
+    skillItems.length > 0,
   ];
-  console.log("Profile data from Redux:", profileData);
+  const completedCount = completionItems.filter(Boolean).length;
+  const completionPercent = Math.round(
+    (completedCount / completionItems.length) * 100,
+  );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 capitalize">
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        {/* Profile Header Card */}
-        <div className="bg-slate-900 rounded-xl shadow-lg border border-slate-800 overflow-hidden mb-6">
-          <div className="px-6 py-10 text-center">
-            <div className="mx-auto h-36 w-36 overflow-hidden rounded-full border-4 border-slate-800 shadow-lg bg-slate-800">
-              <img
-                src={
-                  photoUrl ||
-                  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
-                }
-                alt="Profile"
-                onError={(event) => {
-                  event.currentTarget.src =
-                    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80";
-                }}
-                className="h-full w-full object-cover"
-              />
-            </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <section className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
+          <div className="border-b border-slate-800 bg-slate-950/40 px-6 py-5">
+            <p className="text-sm font-medium text-sky-400">Developer profile</p>
+            <h1 className="mt-2 text-3xl font-bold text-white">{fullName}</h1>
+          </div>
 
-            <div className="mt-6">
-              <h1 className="text-3xl font-bold text-white">
-                {firstName} {lastName ? lastName : ""}
-              </h1>
-              <p className="text-lg text-slate-300 mt-2">
-                {city && state
-                  ? `${city}, ${state}`
-                  : city || state || "Location not specified"}
-              </p>
-              <div className="flex flex-wrap justify-center items-center gap-3 mt-3 text-sm text-slate-400">
-                {age && <span>{age} years old</span>}
-                {gender && <span>• {gender}</span>}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setOpenEdit(true)}
-              className="mt-8 inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-medium py-2.5 px-6 rounded-lg transition-colors duration-200"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          <div className="grid gap-8 p-6 lg:grid-cols-[18rem_1fr]">
+            <aside>
+              <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+                <img
+                  src={
+                    photoUrl ||
+                    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
+                  }
+                  alt={`${fullName} profile`}
+                  onError={(event) => {
+                    event.currentTarget.src =
+                      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80";
+                  }}
+                  className="aspect-square w-full object-cover"
                 />
-              </svg>
-              Edit Profile
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* About Section */}
-            {description && (
-              <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-800 p-6">
-                <h2 className="text-xl font-semibold text-white mb-4">About</h2>
-                <p className="text-slate-300 leading-relaxed">{description}</p>
               </div>
-            )}
 
-            {/* Skills Section */}
-            {skills && (
-              <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-800 p-6">
-                <h2 className="text-xl font-semibold text-white mb-4">
-                  Skills & Expertise
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {Array.isArray(skills) ? (
-                    skills.map((skill, i) => (
-                      <span
-                        key={i}
-                        className="bg-slate-800 text-slate-200 px-3 py-1 rounded-full text-sm font-medium border border-slate-700"
-                      >
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="bg-slate-800 text-slate-200 px-3 py-1 rounded-full text-sm font-medium border border-slate-700">
-                      {skills}
-                    </span>
-                  )}
+              <button
+                type="button"
+                onClick={() => setOpenEdit(true)}
+                className="mt-4 h-11 w-full rounded-lg bg-sky-500 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              >
+                Edit Profile
+              </button>
+            </aside>
+
+            <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+              <main className="space-y-6">
+                <div>
+                  <p className="text-sm text-slate-400">{location}</p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-500">
+                    {age && <span>{age} years old</span>}
+                    {gender && <span>{gender}</span>}
+                    {college && <span>{college}</span>}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Contact Info */}
-            <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-800 p-6">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Contact Information
-              </h2>
-              <div className="space-y-3">
-                {profileAttributes.map((item, ind) => (
-                  <div
-                    key={ind}
-                    className="flex justify-between items-center py-2 border-b border-slate-800 last:border-b-0"
-                  >
-                    <span className="text-slate-400 text-sm">{item.Label}</span>
-                    <span className="text-slate-100 font-medium text-sm">
-                      {item.value || "Not specified"}
+                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                  <h2 className="text-lg font-semibold text-white">About</h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    {description ||
+                      "Add a short summary so other developers know what you work on and what you are looking for."}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                  <h2 className="text-lg font-semibold text-white">Skills</h2>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {skillItems.length ? (
+                      skillItems.map((skill) => (
+                        <span
+                          key={skill}
+                          className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300"
+                        >
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-slate-500">
+                        No skills listed yet.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </main>
+
+              <aside className="space-y-6">
+                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-white">
+                      Profile Strength
+                    </h2>
+                    <span className="text-sm font-semibold text-sky-400">
+                      {completionPercent}%
                     </span>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="mt-4 h-2 rounded-full bg-slate-800">
+                    <div
+                      className="h-full rounded-full bg-sky-500"
+                      style={{ width: `${completionPercent}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-sm text-slate-500">
+                    Complete profile details improve discovery quality.
+                  </p>
+                </div>
 
-            {/* Stats Card */}
-            <div className="bg-slate-900 rounded-xl shadow-sm border border-slate-800 p-6">
-              <h2 className="text-xl font-semibold text-white mb-4">
-                Profile Stats
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-sky-400">0</div>
-                  <div className="text-sm text-slate-400">Connections</div>
+                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                  <h2 className="text-lg font-semibold text-white">
+                    Details
+                  </h2>
+                  <div className="mt-3">
+                    <DetailRow label="Email" value={emailId} />
+                    <DetailRow label="Gender" value={gender} />
+                    <DetailRow label="Age" value={age} />
+                    <DetailRow label="City" value={city} />
+                    <DetailRow label="State" value={state} />
+                    <DetailRow label="College" value={college} />
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-emerald-400">0</div>
-                  <div className="text-sm text-slate-400">Projects</div>
-                </div>
-              </div>
+              </aside>
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       {openEdit && (

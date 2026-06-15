@@ -26,6 +26,11 @@ const Body = () => {
   const userData = useSelector((state) => state.user);
   const [socket, setSocket] = useState(null);
   const socketRef = useRef(null);
+  const pathnameRef = useRef(location.pathname);
+
+  useEffect(() => {
+    pathnameRef.current = location.pathname;
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,6 +64,7 @@ const Body = () => {
 
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
+      setSocket(socket);
     });
 
     // Event: request:received
@@ -104,7 +110,7 @@ const Body = () => {
     });
 
     socket.on("notification:message", (payload) => {
-      if (location.pathname.startsWith("/chat/")) return;
+      if (pathnameRef.current.startsWith("/chat/")) return;
       ToastNotification(
         "New message",
         payload.snippet || "You received a new message.",
@@ -118,7 +124,6 @@ const Body = () => {
     });
 
     socketRef.current = socket;
-    setSocket(socket);
 
     return () => {
       socket.off("request:received");

@@ -7,9 +7,12 @@ import UserFeedCard from "./UserFeedCard";
 import LoadingPage from "./LoadingPage";
 import { ToastNotification } from "./ToastNotification";
 
-//Feed Pagination has to be done
+const filterOptions = ["All", "With skills", "With location"];
+
 const Feed = () => {
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
   const dispatch = useDispatch();
   const feedDataFromStore = useSelector((state) => state.feed);
 
@@ -34,31 +37,67 @@ const Feed = () => {
     loadFeed();
   }, [feedDataFromStore, dispatch]);
 
+  const feedItems = feedDataFromStore || [];
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredFeed = feedItems.filter((developer) => {
+    const skillsText = Array.isArray(developer.skills)
+      ? developer.skills.join(" ")
+      : developer.skills || "";
+    const searchableText = [
+      developer.firstName,
+      developer.lastName,
+      developer.city,
+      developer.state,
+      developer.college,
+      developer.description,
+      skillsText,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch =
+      !normalizedSearch || searchableText.includes(normalizedSearch);
+    const hasSkills =
+      Array.isArray(developer.skills) && developer.skills.length > 0;
+    const hasLocation = Boolean(developer.city || developer.state);
+    const matchesFilter =
+      activeFilter === "All" ||
+      (activeFilter === "With skills" && hasSkills) ||
+      (activeFilter === "With location" && hasLocation);
+
+    return matchesSearch && matchesFilter;
+  });
+
   if (loading) {
     return <LoadingPage />;
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Header */}
-      <div className="bg-slate-950/95 backdrop-blur border-b border-slate-800 sticky top-0 z-20 shadow-sm shadow-slate-950/20">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="border-b border-slate-800 bg-slate-950">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">
+              <p className="text-sm font-medium text-sky-400">
+                Developer discovery
+              </p>
+              <h1 className="mt-2 text-3xl font-bold text-white">
                 Discover Developers
               </h1>
-              <p className="mt-2 text-slate-400 max-w-2xl">
-                Browse fresh profiles, connect with talented peers, and grow
-                your professional network from one streamlined feed.
+              <p className="mt-2 max-w-2xl text-slate-400">
+                Find peers by skills, location, and profile details. Every
+                action updates the feed immediately.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-              <div className="relative w-full sm:w-72">
+            <div className="grid gap-3 sm:grid-cols-[minmax(16rem,24rem)_auto]">
+              <div className="relative">
                 <input
                   type="text"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search developers..."
-                  className="w-full pl-10 pr-4 py-3 border border-slate-700 rounded-2xl bg-slate-900 text-slate-100 focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-slate-700 bg-slate-900 pl-10 pr-4 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
                 />
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
@@ -74,38 +113,59 @@ const Feed = () => {
                   />
                 </svg>
               </div>
-              <button className="inline-flex items-center justify-center rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400">
-                Filters
-              </button>
+              <div className="flex rounded-lg border border-slate-800 bg-slate-900 p-1">
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setActiveFilter(filter)}
+                    className={`h-9 rounded-md px-3 text-xs font-semibold transition ${
+                      activeFilter === filter
+                        ? "bg-slate-100 text-slate-950"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-400">
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1">
-              Remote-friendly
-            </span>
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1">
-              Open to collaborate
-            </span>
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1">
-              New profiles
-            </span>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+              <p className="text-xs text-slate-500">Loaded profiles</p>
+              <p className="mt-1 text-2xl font-semibold text-white">
+                {feedItems.length}
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+              <p className="text-xs text-slate-500">Current matches</p>
+              <p className="mt-1 text-2xl font-semibold text-white">
+                {filteredFeed.length}
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+              <p className="text-xs text-slate-500">Active filter</p>
+              <p className="mt-1 text-sm font-semibold text-slate-200">
+                {activeFilter}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {feedDataFromStore?.length ? (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {filteredFeed.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {feedDataFromStore.map((feed) => (
+            {filteredFeed.map((feed) => (
               <UserFeedCard data={feed} key={feed._id || feed.id} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="mx-auto w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mb-6 border border-slate-700">
+          <div className="mx-auto max-w-xl rounded-xl border border-slate-800 bg-slate-900 p-10 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-slate-700 bg-slate-950">
               <svg
-                className="w-12 h-12 text-slate-500"
+                className="w-8 h-8 text-slate-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -118,14 +178,21 @@ const Feed = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              No developers found
+            <h3 className="mb-2 text-xl font-semibold text-white">
+              No matching developers
             </h3>
-            <p className="text-slate-400 mb-6">
-              Be the first to join our developer community!
+            <p className="mb-6 text-slate-400">
+              Try a different search term or clear the active filter.
             </p>
-            <button className="bg-sky-500 hover:bg-sky-400 text-slate-950 px-6 py-3 rounded-lg font-medium transition-colors">
-              Invite Developers
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setActiveFilter("All");
+              }}
+              className="rounded-lg bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+            >
+              Clear filters
             </button>
           </div>
         )}
