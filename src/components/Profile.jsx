@@ -61,17 +61,17 @@ const Profile = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <section className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
-          <div className="border-b border-slate-800 bg-slate-950/40 px-6 py-5">
-            <p className="text-sm font-medium text-sky-400">Developer profile</p>
-            <h1 className="mt-2 text-3xl font-bold text-white">{fullName}</h1>
+    <div className="app-shell">
+      <div className="page-wrap">
+        <section className="panel overflow-hidden">
+          <div className="border-b border-white/10 bg-slate-950/40 px-6 py-5">
+            <p className="eyebrow">Developer profile</p>
+            <h1 className="page-title">{fullName}</h1>
           </div>
 
           <div className="grid gap-8 p-6 lg:grid-cols-[18rem_1fr]">
             <aside>
-              <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+              <div className="overflow-hidden rounded-lg border border-white/10 bg-slate-950">
                 <img
                   src={
                     photoUrl ||
@@ -89,7 +89,7 @@ const Profile = () => {
               <button
                 type="button"
                 onClick={() => setOpenEdit(true)}
-                className="mt-4 h-11 w-full rounded-lg bg-sky-500 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+                className="btn-primary mt-4 w-full"
               >
                 Edit Profile
               </button>
@@ -106,7 +106,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                <div className="panel-soft p-5">
                   <h2 className="text-lg font-semibold text-white">About</h2>
                   <p className="mt-3 text-sm leading-7 text-slate-300">
                     {description ||
@@ -114,14 +114,14 @@ const Profile = () => {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                <div className="panel-soft p-5">
                   <h2 className="text-lg font-semibold text-white">Skills</h2>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {skillItems.length ? (
                       skillItems.map((skill) => (
                         <span
                           key={skill}
-                          className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300"
+                          className="chip"
                         >
                           {skill}
                         </span>
@@ -136,18 +136,18 @@ const Profile = () => {
               </main>
 
               <aside className="space-y-6">
-                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                <div className="panel-soft p-5">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-white">
                       Profile Strength
                     </h2>
-                    <span className="text-sm font-semibold text-sky-400">
+                    <span className="text-sm font-semibold text-cyan-300">
                       {completionPercent}%
                     </span>
                   </div>
                   <div className="mt-4 h-2 rounded-full bg-slate-800">
                     <div
-                      className="h-full rounded-full bg-sky-500"
+                      className="h-full rounded-full bg-cyan-400"
                       style={{ width: `${completionPercent}%` }}
                     />
                   </div>
@@ -156,7 +156,7 @@ const Profile = () => {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-800 bg-slate-950 p-5">
+                <div className="panel-soft p-5">
                   <h2 className="text-lg font-semibold text-white">
                     Details
                   </h2>

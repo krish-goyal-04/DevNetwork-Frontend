@@ -67,7 +67,8 @@ const UserDetailsCard = ({ user = {}, type }) => {
   } = user;
 
   const presence = useSelector((state) => state.presence || {});
-  const isOnline = presence[_id] ?? initialOnline;
+  const userId = String(_id || "");
+  const isOnline = presence[userId] ?? initialOnline;
 
   const fullName =
     [firstName, lastName].filter(Boolean).join(" ") || "Connection";
@@ -105,10 +106,10 @@ const UserDetailsCard = ({ user = {}, type }) => {
   };
 
   return (
-    <article className="w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/10 transition hover:border-slate-700">
+    <article className="panel w-full overflow-hidden transition hover:border-cyan-400/30">
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-4">
-          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/10 bg-slate-800">
             <img
               src={
                 photoUrl ||
@@ -131,8 +132,8 @@ const UserDetailsCard = ({ user = {}, type }) => {
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
                   isOnline
-                    ? "bg-emerald-400/15 text-emerald-300"
-                    : "bg-slate-700/70 text-slate-400"
+                    ? "border border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
+                    : "border border-white/10 bg-slate-800 text-slate-400"
                 }`}
               >
                 <span
@@ -157,10 +158,30 @@ const UserDetailsCard = ({ user = {}, type }) => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {type === "request" && (
+            <>
+              <button
+                type="button"
+                disabled={processing}
+                onClick={() => reviewRequest("accepted")}
+                className="btn-primary h-10 px-4"
+              >
+                Accept
+              </button>
+              <button
+                type="button"
+                disabled={processing}
+                onClick={() => reviewRequest("rejected")}
+                className="btn-secondary h-10 px-4"
+              >
+                Reject
+              </button>
+            </>
+          )}
           {type !== "request" && connectionId && (
             <Link
               to={`/chat/${_id}`}
-              className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              className="btn-primary h-10 px-4"
             >
               Chat
             </Link>
@@ -168,7 +189,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
           <button
             type="button"
             onClick={() => setProfileView((prev) => !prev)}
-            className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
+            className="btn-secondary h-10 px-4"
           >
             {profileView ? "Hide details" : "View details"}
           </button>
@@ -176,9 +197,25 @@ const UserDetailsCard = ({ user = {}, type }) => {
       </div>
 
       {profileView && (
-        <div className="border-t border-slate-800 bg-slate-950/40 p-5">
+        <div className="border-t border-white/10 bg-slate-950/40 p-5">
+          {type === "request" && (
+            <div className="mb-4 flex flex-col gap-3 rounded-lg border border-cyan-400/15 bg-cyan-400/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Review connection request
+                </p>
+                <p className="mt-1 text-sm text-slate-400">
+                  Check profile context before accepting this developer into
+                  your network.
+                </p>
+              </div>
+              {requestedAgo && (
+                <span className="chip shrink-0">Requested {requestedAgo}</span>
+              )}
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+            <div className="panel-soft p-4">
               <p className="text-xs font-semibold uppercase text-slate-500">
                 College
               </p>
@@ -186,13 +223,13 @@ const UserDetailsCard = ({ user = {}, type }) => {
                 {college || "Not available"}
               </p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+            <div className="panel-soft p-4">
               <p className="text-xs font-semibold uppercase text-slate-500">
                 Location
               </p>
               <p className="mt-2 text-sm text-slate-200">{location}</p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+            <div className="panel-soft p-4">
               <p className="text-xs font-semibold uppercase text-slate-500">
                 Profile
               </p>
@@ -205,7 +242,7 @@ const UserDetailsCard = ({ user = {}, type }) => {
             </div>
           </div>
 
-          <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
+          <div className="panel-soft mt-4 p-4">
             <p className="text-xs font-semibold uppercase text-slate-500">
               About
             </p>
@@ -219,36 +256,21 @@ const UserDetailsCard = ({ user = {}, type }) => {
               skillItems.map((skill, index) => (
                 <span
                   key={`${skill}-${index}`}
-                  className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300"
+                  className="chip"
                 >
                   {skill}
                 </span>
               ))
             ) : (
-              <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-300">
+              <span className="chip">
                 No skills listed
               </span>
             )}
           </div>
 
           {type === "request" && (
-            <div className="mt-5 flex max-w-sm gap-3">
-              <button
-                type="button"
-                disabled={processing}
-                onClick={() => reviewRequest("accepted")}
-                className="h-11 flex-1 rounded-lg bg-sky-500 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Accept
-              </button>
-              <button
-                type="button"
-                disabled={processing}
-                onClick={() => reviewRequest("rejected")}
-                className="h-11 flex-1 rounded-lg border border-slate-700 bg-slate-800 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Reject
-              </button>
+            <div className="mt-5 rounded-lg border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
+              Accepting adds this developer to your network and enables chat.
             </div>
           )}
         </div>

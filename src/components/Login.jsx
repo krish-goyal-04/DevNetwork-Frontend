@@ -32,14 +32,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto grid min-h-screen max-w-7xl px-4 py-10 lg:grid-cols-[1fr_28rem] lg:items-center lg:gap-16">
+    <div className="app-shell">
+      <div className="mx-auto grid min-h-screen max-w-7xl px-4 py-10 sm:px-6 lg:grid-cols-[1fr_28rem] lg:items-center lg:gap-16 lg:px-8">
         <section className="hidden lg:block">
           <div className="max-w-2xl">
-            <div className="mb-8 inline-flex items-center rounded-full border border-slate-800 bg-slate-900 px-4 py-2 text-sm text-slate-300">
-              Full-stack developer networking platform
+            <div className="mb-8 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200">
+              Professional developer networking
             </div>
-            <h1 className="text-5xl font-bold leading-tight text-white">
+            <h1 className="max-w-2xl text-5xl font-semibold leading-tight tracking-normal text-white">
               Build your network with people who actually write code.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-slate-400">
@@ -50,7 +50,7 @@ const Login = () => {
               {["Secure auth", "Live chat", "Profile discovery"].map((item) => (
                 <div
                   key={item}
-                  className="rounded-xl border border-slate-800 bg-slate-900 p-4"
+                  className="panel-soft p-4"
                 >
                   <p className="text-sm font-semibold text-slate-200">{item}</p>
                 </div>
@@ -60,10 +60,10 @@ const Login = () => {
         </section>
 
         <section className="flex items-center justify-center">
-          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/30">
+          <div className="panel w-full max-w-md p-6">
             <div className="mb-8">
               <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500 text-sm font-bold text-slate-950">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400 text-sm font-bold text-slate-950">
                   D
                 </div>
                 <span className="text-xl font-bold text-white">DevNetwork</span>
@@ -89,7 +89,7 @@ const Login = () => {
                   type="email"
                   value={emailId}
                   onChange={(event) => setEmailId(event.target.value)}
-                  className="mt-2 h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="input-control"
                   placeholder="you@example.com"
                   required
                 />
@@ -103,7 +103,7 @@ const Login = () => {
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="mt-2 h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="input-control"
                   placeholder="Enter your password"
                   required
                 />
@@ -117,7 +117,7 @@ const Login = () => {
 
               <button
                 type="submit"
-                className="h-11 w-full rounded-lg bg-sky-500 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-primary w-full"
                 disabled={loading}
               >
                 {loading ? "Signing in..." : "Sign in"}
@@ -128,7 +128,7 @@ const Login = () => {
               New to DevNetwork?{" "}
               <Link
                 to="/signup"
-                className="font-semibold text-sky-400 hover:text-sky-300"
+                className="font-semibold text-cyan-300 hover:text-cyan-200"
               >
                 Create an account
               </Link>

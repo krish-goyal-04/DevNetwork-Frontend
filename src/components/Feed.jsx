@@ -74,18 +74,18 @@ const Feed = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="border-b border-slate-800 bg-slate-950">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="app-shell">
+      <div className="border-b border-white/10 bg-slate-950/35">
+        <div className="page-wrap">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium text-sky-400">
+              <p className="eyebrow">
                 Developer discovery
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-white">
+              <h1 className="page-title">
                 Discover Developers
               </h1>
-              <p className="mt-2 max-w-2xl text-slate-400">
+              <p className="page-copy">
                 Find peers by skills, location, and profile details. Every
                 action updates the feed immediately.
               </p>
@@ -97,7 +97,7 @@ const Feed = () => {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search developers..."
-                  className="h-11 w-full rounded-lg border border-slate-700 bg-slate-900 pl-10 pr-4 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                  className="h-11 w-full rounded-lg border border-slate-700/80 bg-slate-950/80 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
                 />
                 <svg
                   className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
@@ -113,7 +113,7 @@ const Feed = () => {
                   />
                 </svg>
               </div>
-              <div className="flex rounded-lg border border-slate-800 bg-slate-900 p-1">
+              <div className="flex rounded-lg border border-white/10 bg-slate-900/80 p-1">
                 {filterOptions.map((filter) => (
                   <button
                     key={filter}
@@ -121,7 +121,7 @@ const Feed = () => {
                     onClick={() => setActiveFilter(filter)}
                     className={`h-9 rounded-md px-3 text-xs font-semibold transition ${
                       activeFilter === filter
-                        ? "bg-slate-100 text-slate-950"
+                        ? "bg-cyan-400 text-slate-950"
                         : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -132,19 +132,19 @@ const Feed = () => {
             </div>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+            <div className="panel-soft px-4 py-3">
               <p className="text-xs text-slate-500">Loaded profiles</p>
               <p className="mt-1 text-2xl font-semibold text-white">
                 {feedItems.length}
               </p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+            <div className="panel-soft px-4 py-3">
               <p className="text-xs text-slate-500">Current matches</p>
               <p className="mt-1 text-2xl font-semibold text-white">
                 {filteredFeed.length}
               </p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+            <div className="panel-soft px-4 py-3">
               <p className="text-xs text-slate-500">Active filter</p>
               <p className="mt-1 text-sm font-semibold text-slate-200">
                 {activeFilter}
@@ -154,7 +154,7 @@ const Feed = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="page-wrap">
         {filteredFeed.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredFeed.map((feed) => (
@@ -162,7 +162,7 @@ const Feed = () => {
             ))}
           </div>
         ) : (
-          <div className="mx-auto max-w-xl rounded-xl border border-slate-800 bg-slate-900 p-10 text-center">
+          <div className="panel mx-auto max-w-xl p-10 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-slate-700 bg-slate-950">
               <svg
                 className="w-8 h-8 text-slate-500"
@@ -190,7 +190,7 @@ const Feed = () => {
                 setSearchTerm("");
                 setActiveFilter("All");
               }}
-              className="rounded-lg bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              className="btn-primary"
             >
               Clear filters
             </button>

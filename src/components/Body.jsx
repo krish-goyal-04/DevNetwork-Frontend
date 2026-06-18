@@ -64,7 +64,6 @@ const Body = () => {
     });
 
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
       setSocket(socket);
     });
 
@@ -95,7 +94,6 @@ const Body = () => {
     // Note: The receiver already removed the request via removeRequest in UserDetailsCard.
     // Here we handle the SENDER side: they may want to see that their request was reviewed.
     socket.on("request:reviewed", (payload) => {
-      console.log("Request reviewed:", payload);
       dispatch(handleRequestReview(payload));
 
       const name = payload.toUser
@@ -120,12 +118,10 @@ const Body = () => {
     });
 
     socket.on("user:status-changed", ({ userId, online }) => {
-      console.log("user:status-changed received:", userId, online);
       dispatch(online ? setUserOnline({ userId }) : setUserOffline({ userId }));
     });
 
     socket.on("disconnect", () => {
-      console.log("Socket disconnected");
       setSocket(null);
     });
 
@@ -148,9 +144,9 @@ const Body = () => {
     // SocketContext.Provider makes the socket available to every page and nested component.
     // It is created once in Body.jsx and then consumed by child components via useSocket().
     <SocketContext.Provider value={socket}>
-      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+      <div className="app-shell flex flex-col">
         <NavBar />
-        <div className="pt-16 flex-1">
+        <div className="flex-1">
           <Outlet />
         </div>
         <Footer />

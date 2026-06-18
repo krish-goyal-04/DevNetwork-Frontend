@@ -6,7 +6,7 @@ import { removeUserFromFeed } from "../utils/feedSlice";
 import { ToastNotification } from "./ToastNotification";
 
 const Pill = ({ children }) => (
-  <span className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300">
+  <span className="chip">
     {children}
   </span>
 );
@@ -15,6 +15,7 @@ const UserFeedCard = ({ data = {} }) => {
   const dispatch = useDispatch();
   const [error, setError] = useState("");
   const [processingRequest, setProcessingRequest] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const {
     firstName,
@@ -39,6 +40,7 @@ const UserFeedCard = ({ data = {} }) => {
         .map((skill) => skill.trim())
         .filter(Boolean)
     : [];
+  const primarySkill = skillItems[0] || "Open to connect";
   const metaItems = [
     age ? `${age} yrs` : null,
     gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : null,
@@ -83,10 +85,11 @@ const UserFeedCard = ({ data = {} }) => {
   };
 
   return (
-    <article className="flex min-h-[22rem] flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:border-slate-700">
-      <div className="flex flex-1 flex-col p-6">
+    <article className="panel group flex min-h-[27rem] flex-col overflow-hidden transition hover:-translate-y-0.5 hover:border-cyan-400/30">
+      <div className="h-1 bg-cyan-400" />
+      <div className="border-b border-white/10 bg-slate-950/35 px-6 py-5">
         <div className="flex items-start gap-4">
-          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-slate-700 bg-slate-800">
+          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-slate-800 shadow-lg shadow-black/20">
             {photoUrl ? (
               <img
                 src={photoUrl}
@@ -98,7 +101,7 @@ const UserFeedCard = ({ data = {} }) => {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-sky-500 text-lg font-bold text-slate-950">
+              <div className="flex h-full w-full items-center justify-center bg-cyan-400 text-lg font-bold text-slate-950">
                 {firstName?.charAt(0)}
                 {lastName ? lastName.charAt(0) : ""}
               </div>
@@ -106,17 +109,51 @@ const UserFeedCard = ({ data = {} }) => {
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-lg font-semibold text-white">
-              {fullName}
-            </h3>
-            <p className="mt-1 text-sm text-slate-400">{location}</p>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
-              {metaItems.length ? (
-                metaItems.map((item) => <span key={item}>{item}</span>)
-              ) : (
-                <span>Profile details pending</span>
-              )}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="truncate text-xl font-semibold text-white">
+                  {fullName}
+                </h3>
+                <p className="mt-1 truncate text-sm text-slate-400">
+                  {location}
+                </p>
+              </div>
+              <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200">
+                Profile
+              </span>
             </div>
+            <p className="mt-3 inline-flex rounded-full border border-white/10 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-200">
+              {primarySkill}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-6">
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-lg border border-white/10 bg-slate-950/45 px-2 py-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+              Skills
+            </p>
+            <p className="mt-1 text-sm font-semibold text-white">
+              {skillItems.length || 0}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-950/45 px-2 py-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+              Age
+            </p>
+            <p className="mt-1 text-sm font-semibold text-white">
+              {age || "-"}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-950/45 px-2 py-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+              Profile
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-white">
+              {gender || "Open"}
+            </p>
           </div>
         </div>
 
@@ -134,11 +171,59 @@ const UserFeedCard = ({ data = {} }) => {
           )}
         </div>
 
+        {showDetails && (
+          <div className="mt-5 grid gap-3 rounded-lg border border-white/10 bg-slate-950/45 p-4 text-sm">
+            {metaItems.length > 0 && (
+              <div className="flex flex-wrap gap-2 border-b border-white/10 pb-3">
+                {metaItems.map((item) => (
+                  <span className="chip" key={item}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-slate-500">Location</span>
+              <span className="text-right font-medium text-slate-200">
+                {location}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-slate-500">College</span>
+              <span className="text-right font-medium text-slate-200">
+                {college || "Not specified"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-slate-500">Profile</span>
+              <span className="text-right font-medium text-slate-200">
+                {[age ? `${age} yrs` : null, gender || null]
+                  .filter(Boolean)
+                  .join(" | ") || "Not specified"}
+              </span>
+            </div>
+            {skillItems.length > 4 && (
+              <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                {skillItems.slice(4).map((skill) => (
+                  <Pill key={skill}>{skill}</Pill>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="mt-auto pt-6">
+          <button
+            type="button"
+            onClick={() => setShowDetails((prev) => !prev)}
+            className="mb-3 h-10 w-full rounded-lg border border-white/10 bg-slate-950/40 text-sm font-semibold text-slate-300 hover:border-cyan-400/30 hover:text-white"
+          >
+            {showDetails ? "Hide profile details" : "View profile details"}
+          </button>
           <div className="flex gap-3">
             <button
               type="button"
-              className="flex h-11 flex-1 items-center justify-center rounded-lg bg-sky-500 px-4 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-primary flex-1"
               disabled={processingRequest}
               onClick={() => manageConnectionRequest("interested")}
             >
@@ -146,7 +231,7 @@ const UserFeedCard = ({ data = {} }) => {
             </button>
             <button
               type="button"
-              className="flex h-11 flex-1 items-center justify-center rounded-lg bg-slate-800 px-4 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-secondary flex-1"
               disabled={processingRequest}
               onClick={() => manageConnectionRequest("ignored")}
             >

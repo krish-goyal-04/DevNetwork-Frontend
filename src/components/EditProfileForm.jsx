@@ -74,9 +74,9 @@ const EditProfileForm = ({ user = {}, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-6 backdrop-blur-sm">
       <form
         onSubmit={handleSave}
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 shadow-2xl shadow-black/40"
+        className="panel max-h-[90vh] w-full max-w-2xl overflow-y-auto"
       >
-        <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 px-6 py-5">
+        <div className="sticky top-0 z-10 border-b border-white/10 bg-slate-900 px-6 py-5">
           <h2 className="text-xl font-bold text-white">Edit Profile</h2>
           <p className="mt-1 text-sm text-slate-400">
             Keep fields empty if you do not want to update them.
@@ -93,7 +93,7 @@ const EditProfileForm = ({ user = {}, onClose }) => {
                 name={field.name}
                 value={currData[field.name]}
                 onChange={handleChange}
-                className="mt-2 h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                className="input-control"
               />
             </label>
           ))}
@@ -107,7 +107,7 @@ const EditProfileForm = ({ user = {}, onClose }) => {
               max="50"
               value={currData.age}
               onChange={handleChange}
-              className="mt-2 h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="input-control"
             />
           </label>
 
@@ -117,7 +117,7 @@ const EditProfileForm = ({ user = {}, onClose }) => {
               name="gender"
               value={currData.gender}
               onChange={handleChange}
-              className="mt-2 h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="input-control"
             >
               <option value="">Select gender</option>
               <option value="male">Male</option>
@@ -133,7 +133,7 @@ const EditProfileForm = ({ user = {}, onClose }) => {
               value={currData.skills}
               onChange={handleChange}
               placeholder="React, Node.js, MongoDB"
-              className="mt-2 h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="input-control"
             />
           </label>
 
@@ -146,7 +146,7 @@ const EditProfileForm = ({ user = {}, onClose }) => {
               value={currData.description}
               onChange={handleChange}
               rows={4}
-              className="mt-2 w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+              className="textarea-control"
             />
           </label>
 
@@ -157,10 +157,10 @@ const EditProfileForm = ({ user = {}, onClose }) => {
           )}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-800 px-6 py-5">
+        <div className="flex justify-end gap-3 border-t border-white/10 px-6 py-5">
           <button
             type="button"
-            className="h-11 rounded-lg border border-slate-700 bg-slate-800 px-5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700"
+            className="btn-secondary"
             onClick={onClose}
             disabled={saving}
           >
@@ -168,7 +168,7 @@ const EditProfileForm = ({ user = {}, onClose }) => {
           </button>
           <button
             type="submit"
-            className="h-11 rounded-lg bg-sky-500 px-5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary"
             disabled={saving}
           >
             {saving ? "Saving..." : "Save changes"}

@@ -42,17 +42,17 @@ const Requests = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8 flex flex-col gap-4 border-b border-slate-800 pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <div className="app-shell">
+      <div className="page-wrap">
+        <div className="page-header">
           <div>
-            <p className="text-sm font-medium text-emerald-400">
+            <p className="eyebrow">
               Incoming requests
             </p>
-            <h1 className="mt-2 text-3xl font-bold text-white">
+            <h1 className="page-title">
               Connection Requests
             </h1>
-            <p className="mt-2 text-slate-400">
+            <p className="page-copy">
               {requests.length}{" "}
               {requests.length === 1 ? "pending request" : "pending requests"}
               {requests.length > 0 ? " waiting for review." : "."}
@@ -61,7 +61,7 @@ const Requests = () => {
           <button
             type="button"
             onClick={() => navigate("/feed")}
-            className="h-11 rounded-lg bg-sky-500 px-5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+            className="btn-primary"
           >
             Discover developers
           </button>
@@ -70,7 +70,7 @@ const Requests = () => {
         {requests.length > 0 ? (
           <div className="space-y-8">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
               {requests.map((connection) => (
                 <UserDetailsCard
                   key={connection._id}
@@ -82,8 +82,8 @@ const Requests = () => {
           </div>
         ) : (
           <div className="max-w-2xl mx-auto">
-            <div className="bg-slate-900 rounded-xl shadow-lg border border-slate-800 p-12 text-center">
-              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="panel p-12 text-center">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-slate-800">
                 <svg
                   className="w-8 h-8 text-slate-500"
                   fill="none"
@@ -108,7 +108,7 @@ const Requests = () => {
               <button
                 type="button"
                 onClick={() => navigate("/feed")}
-                className="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+                className="btn-primary"
               >
                 Explore Feed
               </button>

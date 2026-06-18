@@ -6,10 +6,38 @@ import { baseURL } from "../utils/constants";
 import { useSocket } from "../context/SocketContext";
 import { ToastNotification } from "./ToastNotification";
 
+const formatMessageTime = (dateString) => {
+  if (!dateString) return "";
+
+  return new Intl.DateTimeFormat("en", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(dateString));
+};
+
+const normalizeSkills = (skills) => {
+  if (Array.isArray(skills)) {
+    return skills
+      .flatMap((skill) => skill.split(","))
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof skills === "string") {
+    return skills
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
 const Chat = () => {
   const { userId: participantId } = useParams();
   const socket = useSocket();
   const currentUser = useSelector((state) => state.user);
+  const presence = useSelector((state) => state.presence || {});
   // partner holds the details of the user we are chatting with
   const [partner, setPartner] = useState(null);
   // messages is the list of chat messages in this conversation
@@ -128,114 +156,226 @@ const Chat = () => {
     if (!partner) return null;
     const fullName =
       `${partner.firstName || "User"} ${partner.lastName || ""}`.trim();
+    const location =
+      [partner.city, partner.state].filter(Boolean).join(", ") ||
+      "Connected developer";
+    const initials = `${partner.firstName?.[0] || "U"}${partner.lastName?.[0] || ""}`;
+    const isOnline =
+      presence[String(participantId)] ?? partner.isOnline ?? false;
 
     return (
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-slate-900 rounded-3xl border border-slate-800 p-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">
-            Chat with {fullName}
-          </h1>
-          <p className="text-sm text-slate-400">
-            Only connected users can exchange messages here.
-          </p>
+      <div className="chat-header flex flex-col gap-3 border-b border-white/10 bg-slate-950/95 px-5 py-3 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-cyan-400 text-slate-950 shadow-sm shadow-cyan-500/10 ring-1 ring-white/10">
+            {partner.photoUrl ? (
+              <img
+                src={partner.photoUrl}
+                alt={`${fullName} profile`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs font-bold">
+                {initials}
+              </div>
+            )}
+            <span
+              className={`absolute -right-0.5 top-0.5 h-3 w-3 rounded-full border border-slate-950/70 ${
+                isOnline
+                  ? "bg-emerald-400 shadow-[0_0_0_2px_rgba(15,23,42,0.55)]"
+                  : "bg-slate-500"
+              }`}
+            />
+          </div>
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-semibold text-white">
+              {fullName}
+            </h1>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-slate-900/70 px-2.5 py-0.5">
+                <span
+                  className={`inline-flex h-2 w-2 rounded-full ${
+                    isOnline ? "bg-emerald-400" : "bg-slate-500"
+                  }`}
+                />
+                {isOnline ? "Online" : "Offline"}
+              </span>
+              <span className="truncate text-xs">{location}</span>
+            </div>
+          </div>
         </div>
         <Link
           to="/connections"
-          className="inline-flex items-center gap-2 rounded-2xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700"
+          className="btn-secondary flex h-9 items-center justify-center px-4 text-xs font-semibold"
         >
-          Back to connections
+          Back
         </Link>
       </div>
     );
   };
 
+  const renderPartnerPanel = () => {
+    if (!partner) return null;
+
+    const fullName =
+      `${partner.firstName || "User"} ${partner.lastName || ""}`.trim();
+    const location =
+      [partner.city, partner.state].filter(Boolean).join(", ") ||
+      "Location not specified";
+    const skillItems = normalizeSkills(partner.skills);
+    const profileItems = [
+      partner.age ? `${partner.age} yrs` : null,
+      partner.gender || null,
+      partner.college || null,
+    ].filter(Boolean);
+
+    return (
+      <aside className="panel hidden h-full flex flex-col p-4 lg:flex overflow-hidden">
+        <p className="eyebrow text-xs">About</p>
+        <div className="mt-3 overflow-hidden rounded-lg border border-white/10 bg-slate-950 flex-shrink-0">
+          <img
+            src={
+              partner.photoUrl ||
+              "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
+            }
+            alt={`${fullName} profile`}
+            onError={(event) => {
+              event.currentTarget.src =
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80";
+            }}
+            className="aspect-[3/2] w-full object-cover"
+          />
+        </div>
+        <h2 className="mt-3 text-base font-semibold text-white truncate">
+          {fullName}
+        </h2>
+        <p className="mt-1 text-xs text-slate-400 truncate">{location}</p>
+        {profileItems.length > 0 && (
+          <div className="mt-3 space-y-1.5 border-t border-white/10 pt-3 text-xs text-slate-300 flex-shrink-0">
+            {profileItems.map((item) => (
+              <p key={item} className="text-slate-300">
+                {item}
+              </p>
+            ))}
+          </div>
+        )}
+        <div className="mt-3 flex flex-wrap gap-1.5 overflow-y-auto">
+          {skillItems.length ? (
+            skillItems.slice(0, 8).map((skill) => (
+              <span className="chip text-xs" key={skill}>
+                {skill}
+              </span>
+            ))
+          ) : (
+            <span className="chip text-xs">No skills</span>
+          )}
+        </div>
+      </aside>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {loading ? (
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-10 text-center">
-            <p className="text-slate-400">Loading chat...</p>
-          </div>
-        ) : chatError ? (
-          <div className="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-8 text-center text-rose-100">
-            <p className="text-lg font-semibold">{chatError}</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
+    <div className="app-shell flex flex-col h-screen overflow-hidden">
+      {loading ? (
+        <div className="panel m-4 p-10 text-center">
+          <p className="text-slate-400">Loading chat...</p>
+        </div>
+      ) : chatError ? (
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-8 m-4 text-center text-rose-100">
+          <p className="text-lg font-semibold">{chatError}</p>
+        </div>
+      ) : (
+        <div className="grid gap-3 flex-1 overflow-hidden lg:grid-cols-[1fr_20rem] px-3 py-3">
+          <section className="panel overflow-hidden flex flex-col">
             {renderChatHeader()}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900 p-4">
-              <div className="h-[calc(100vh-26rem)] overflow-y-auto rounded-3xl bg-slate-950/70 p-4 shadow-inner">
-                {messages.length === 0 ? (
-                  <div className="py-24 text-center text-slate-500">
-                    <p className="text-lg">No messages yet.</p>
-                    <p className="mt-2 text-sm text-slate-400">
-                      Send the first message to start the conversation.
+            <div className="chat-messages flex-1 overflow-hidden px-4 py-4 sm:px-5">
+              {messages.length === 0 ? (
+                <div className="chat-empty flex h-full items-center justify-center text-center">
+                  <div>
+                    <p className="text-lg font-semibold text-white">
+                      Start the conversation
+                    </p>
+                    <p className="mt-3 max-w-md text-sm leading-6 text-slate-400">
+                      Messages are encrypted in transit. Share a quick intro,
+                      mention your project goals, or ask about their work.
                     </p>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((message) => {
-                      const isFromSelf = currentUser
-                        ? message.fromUserId === currentUser._id
-                        : message.fromSelf === true;
-                      return (
+                </div>
+              ) : (
+                <div className="space-y-3 h-full overflow-y-auto pr-2">
+                  {messages.map((message) => {
+                    const isFromSelf = currentUser
+                      ? message.fromUserId === currentUser._id
+                      : message.fromSelf === true;
+                    return (
+                      <div
+                        key={
+                          message._id ||
+                          `${message.fromUserId}-${message.createdAt}`
+                        }
+                        className={`flex ${
+                          isFromSelf ? "justify-end" : "justify-start"
+                        }`}
+                      >
                         <div
-                          key={message._id}
-                          className={`flex ${
-                            isFromSelf ? "justify-end" : "justify-start"
+                          className={`chat-bubble ${
+                            isFromSelf
+                              ? "chat-bubble-sent"
+                              : "chat-bubble-received"
                           }`}
                         >
-                          <div
-                            className={`max-w-[80%] rounded-3xl border px-4 py-3 text-sm shadow-sm ${
-                              isFromSelf
-                                ? "bg-sky-500 text-slate-950 border-sky-400"
-                                : "bg-slate-800 text-slate-100 border-slate-700"
-                            }`}
-                          >
-                            <p>{message.message}</p>
-                            <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-slate-400">
+                          <p className="whitespace-pre-wrap leading-6">
+                            {message.message}
+                          </p>
+                          <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-slate-500">
+                            <span className="text-xs font-semibold text-slate-300">
                               {isFromSelf
                                 ? "You"
                                 : partner?.firstName || "Connected user"}
-                            </p>
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              {formatMessageTime(message.createdAt)}
+                            </span>
                           </div>
                         </div>
-                      );
-                    })}
-                    <div ref={messageEndRef} />
-                  </div>
-                )}
-              </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messageEndRef} />
+                </div>
+              )}
             </div>
 
-            <form
-              onSubmit={handleSendMessage}
-              className="rounded-3xl border border-slate-800 bg-slate-900 p-4"
-            >
+            <form onSubmit={handleSendMessage} className="chat-input-area">
               <label className="sr-only" htmlFor="chat-input">
                 Type a message
               </label>
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                <textarea
-                  id="chat-input"
-                  value={messageText}
-                  onChange={(event) => setMessageText(event.target.value)}
-                  rows={3}
-                  placeholder="Write your message..."
-                  className="min-h-18 resize-none rounded-3xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
-                />
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                <div>
+                  <textarea
+                    id="chat-input"
+                    value={messageText}
+                    onChange={(event) => setMessageText(event.target.value)}
+                    rows={2}
+                    placeholder="Start typing..."
+                    className="textarea-control mt-0 min-h-[2.5rem] max-h-20"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    {messageText.trim().length} chars
+                  </p>
+                </div>
                 <button
                   type="submit"
                   disabled={!messageText.trim() || isJoining}
-                  className="inline-flex items-center justify-center rounded-3xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-primary flex min-h-[2.5rem] items-center justify-center px-5 py-2"
                 >
-                  {isJoining ? "Joining chat..." : "Send"}
+                  {isJoining ? "Joining..." : "Send"}
                 </button>
               </div>
             </form>
-          </div>
-        )}
-      </div>
+          </section>
+          {renderPartnerPanel()}
+        </div>
+      )}
     </div>
   );
 };
