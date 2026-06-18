@@ -6,6 +6,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { addRequests, handleRequestReview } from "../utils/requestsSlice";
+import { setUserOnline, setUserOffline } from "../utils/presenceSlice";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { SocketContext } from "../context/SocketContext";
@@ -118,6 +119,11 @@ const Body = () => {
       );
     });
 
+    socket.on("user:status-changed", ({ userId, online }) => {
+      console.log("user:status-changed received:", userId, online);
+      dispatch(online ? setUserOnline({ userId }) : setUserOffline({ userId }));
+    });
+
     socket.on("disconnect", () => {
       console.log("Socket disconnected");
       setSocket(null);
@@ -129,6 +135,7 @@ const Body = () => {
       socket.off("request:received");
       socket.off("request:reviewed");
       socket.off("notification:message");
+      socket.off("user:status-changed");
       socket.off("connect");
       socket.off("disconnect");
       socket.disconnect();

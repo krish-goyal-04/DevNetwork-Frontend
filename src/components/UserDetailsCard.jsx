@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { Link } from "react-router";
 import { baseURL } from "../utils/constants";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { removeRequest } from "../utils/requestsSlice";
 import { ToastNotification } from "./ToastNotification";
 
@@ -63,7 +63,11 @@ const UserDetailsCard = ({ user = {}, type }) => {
     description,
     connectionId,
     createdAt,
+    isOnline: initialOnline = false,
   } = user;
+
+  const presence = useSelector((state) => state.presence || {});
+  const isOnline = presence[_id] ?? initialOnline;
 
   const fullName =
     [firstName, lastName].filter(Boolean).join(" ") || "Connection";
@@ -120,9 +124,25 @@ const UserDetailsCard = ({ user = {}, type }) => {
           </div>
 
           <div className="min-w-0 capitalize">
-            <h3 className="truncate text-xl font-semibold text-white">
-              {fullName}
-            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="truncate text-xl font-semibold text-white">
+                {fullName}
+              </h3>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                  isOnline
+                    ? "bg-emerald-400/15 text-emerald-300"
+                    : "bg-slate-700/70 text-slate-400"
+                }`}
+              >
+                <span
+                  className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${
+                    isOnline ? "bg-emerald-400" : "bg-slate-500"
+                  }`}
+                />
+                {isOnline ? "Online" : "Offline"}
+              </span>
+            </div>
             <p className="mt-1 text-sm text-slate-400">{location}</p>
             <p className="mt-2 text-sm text-slate-500">
               {age ? `${age} yrs` : "Age not specified"}

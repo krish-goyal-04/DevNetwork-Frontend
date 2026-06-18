@@ -5,6 +5,8 @@ import { baseURL } from "../utils/constants";
 import UserDetailsCard from "./UserDetailsCard";
 import LoadingPage from "./LoadingPage";
 import { ToastNotification } from "./ToastNotification";
+import { useDispatch } from "react-redux";
+import { setPresenceState } from "../utils/presenceSlice";
 
 // Connections uses a structured dark layout with card-based results and a clear empty state.
 // The design keeps user actions visible while preserving readability on large lists.
@@ -12,14 +14,23 @@ const Connections = () => {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const getConnections = async () => {
     try {
       setLoading(true);
       const res = await axios.get(baseURL + "/user/connections", {
         withCredentials: true,
       });
-      setConnections(res.data.data || []);
+      const data = res.data.data || [];
+      console.log("Fetched connections:", data);
+      setConnections(data);
+      // Initialize presence state from API response so badges render immediately because isOnline is part of the user object. This avoids a flash of offline badges before the socket updates arrive. So we extract the isOnline status from the API response and dispatch it to the presence slice.
+      const presenceMap = {};
+      data.forEach((u) => {
+        const id = String(u._id);
+        presenceMap[id] = Boolean(u.isOnline);
+      });
+      dispatch(setPresenceState(presenceMap));
     } catch (err) {
       const message = err.response?.data?.message || err.message;
       console.error(message);
@@ -61,7 +72,6 @@ const Connections = () => {
 
         {connections.length > 0 ? (
           <div className="space-y-8">
-
             <div className="grid grid-cols-1  gap-6">
               {connections.map((connection) => (
                 <UserDetailsCard key={connection._id} user={connection} />
