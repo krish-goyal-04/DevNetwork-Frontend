@@ -1,8 +1,8 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { baseURL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addFeed } from "../utils/feedSlice";
+import { addFeed, appendFeed } from "../utils/feedSlice";
 import UserFeedCard from "./UserFeedCard";
 import LoadingPage from "./LoadingPage";
 import { ToastNotification } from "./ToastNotification";
@@ -11,21 +11,30 @@ const filterOptions = ["All", "With skills", "With location"];
 
 const Feed = () => {
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  console.log("Feed component rendered. Current page:", page);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const dispatch = useDispatch();
-  const feedDataFromStore = useSelector((state) => state.feed);
+  const observerRef = useRef(null);
+  const feedDataFromStore = useSelector((state) => state.feed) || [];
 
   useEffect(() => {
-    const loadFeed = async () => {
-      if (feedDataFromStore) return;
+    const loadInitialFeed = async () => {
+      if (feedDataFromStore.length > 0) return;
+
       try {
         setLoading(true);
-        const res = await axios.get(baseURL + "/feed", {
+        console.log("Loading initial feed data...doing API call");
+        const res = await axios.get(`${baseURL}/feed?page=1&limit=10`, {
           withCredentials: true,
         });
-        const feedData = res.data.data;
+
+        const feedData = res.data.data || [];
         dispatch(addFeed(feedData));
+        setHasMore(feedData.length === 10);
       } catch (err) {
         const message = err?.response?.data?.message || err.message;
         console.error(message);
@@ -34,10 +43,61 @@ const Feed = () => {
         setLoading(false);
       }
     };
-    loadFeed();
-  }, [feedDataFromStore, dispatch]);
 
-  const feedItems = feedDataFromStore || [];
+    loadInitialFeed();
+  }, [dispatch, feedDataFromStore.length]);
+
+  useEffect(() => {
+    if (page === 1) {
+      return;
+    }
+    const loadNextPage = async () => {
+      try {
+        const res = await axios.get(`${baseURL}/feed?page=${page}&limit=10`, {
+          withCredentials: true,
+        });
+
+        const feedData = res.data.data || [];
+        dispatch(appendFeed(feedData));
+        setHasMore(feedData.length === 10);
+      } catch (err) {
+        const message = err?.response?.data?.message || err.message;
+        console.error(message);
+        ToastNotification("Unable to load feed", message, "error");
+      } finally {
+        setLoadingMore(false);
+      }
+    };
+
+    loadNextPage();
+  }, [page, dispatch]);
+  useEffect(() => {
+    console.log("PAGE CHANGED", page);
+  }, [page]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && hasMore && !loadingMore) {
+          console.log("INTERSECTION");
+          setLoadingMore(true);
+          setPage((prevPage) => prevPage + 1);
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    const currentTarget = observerRef.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, loadingMore, feedDataFromStore.length]);
+
+  const feedItems = feedDataFromStore;
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredFeed = feedItems.filter((developer) => {
     const skillsText = Array.isArray(developer.skills)
@@ -79,12 +139,8 @@ const Feed = () => {
         <div className="page-wrap">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="eyebrow">
-                Developer discovery
-              </p>
-              <h1 className="page-title">
-                Discover Developers
-              </h1>
+              <p className="eyebrow">Developer discovery</p>
+              <h1 className="page-title">Discover Developers</h1>
               <p className="page-copy">
                 Find peers by skills, location, and profile details. Every
                 action updates the feed immediately.
@@ -156,11 +212,26 @@ const Feed = () => {
 
       <div className="page-wrap">
         {filteredFeed.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredFeed.map((feed) => (
-              <UserFeedCard data={feed} key={feed._id || feed.id} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredFeed.map((feed) => (
+                <UserFeedCard data={feed} key={feed._id || feed.id} />
+              ))}
+            </div>
+
+            <div ref={observerRef} className="flex justify-center py-8">
+              {loadingMore ? (
+                <div className="flex items-center gap-3 text-sm text-slate-400">
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-700 border-t-cyan-400" />
+                  Loading more developers...
+                </div>
+              ) : hasMore ? (
+                <span className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <p className="text-sm text-slate-500">You are all caught up.</p>
+              )}
+            </div>
+          </>
         ) : (
           <div className="panel mx-auto max-w-xl p-10 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-slate-700 bg-slate-950">
